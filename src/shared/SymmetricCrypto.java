@@ -6,7 +6,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-public class SymmetricKeyManager {
+public class SymmetricCrypto {
   private static final String ALGORITHM = "AES";
   private static final int KEY_BIT_SIZE = 128; // Java supports only 128-bit encryption
 

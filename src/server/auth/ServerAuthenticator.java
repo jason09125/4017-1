@@ -1,6 +1,6 @@
 package server.auth;
 
-import shared.AsymmetricKeyManager;
+import shared.AsymmetricCrypto;
 import shared.DataConverter;
 
 import java.io.FileInputStream;
@@ -24,7 +24,7 @@ public class ServerAuthenticator {
   public static byte[] signChallenge(String challenge) {
     try {
       String privateKeyStr = readProp("SERVER_MASTER_PRIVATE_KEY");
-      return AsymmetricKeyManager.signData(challenge.getBytes("utf-8"), DataConverter.stringToKeyBytes(privateKeyStr));
+      return AsymmetricCrypto.signData(challenge.getBytes("utf-8"), DataConverter.stringToKeyBytes(privateKeyStr));
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     }

@@ -2,7 +2,7 @@ package test;
 
 import server.auth.ServerAuthenticator;
 import server.user.UserManager;
-import shared.AsymmetricKeyManager;
+import shared.AsymmetricCrypto;
 import shared.DataConverter;
 
 import java.io.FileInputStream;
@@ -27,7 +27,7 @@ public class Test {
     String username = "Eric";
     String plainPassword = "123456";
 
-    KeyPair keyPair = AsymmetricKeyManager.generateKeyPair();
+    KeyPair keyPair = AsymmetricCrypto.generateKeyPair();
 
     System.out.println("Client: Please store the following credentials secretly");
     System.out.printf("------ Private Key ---------\n%s\n\n", DataConverter.keyToString(keyPair.getPrivate()));
@@ -46,7 +46,7 @@ public class Test {
     String username = "Eric";
     String plainPassword = "123456";
 
-    byte[] signed = AsymmetricKeyManager.signData("CHALLENGE_COMP4017".getBytes(), privKey);
+    byte[] signed = AsymmetricCrypto.signData("CHALLENGE_COMP4017".getBytes(), privKey);
 
     boolean isAuthenticated = UserManager.auth(username, plainPassword, token, signed);
     System.out.println("Server: authentication status is " + isAuthenticated);
@@ -60,7 +60,7 @@ public class Test {
       Properties prop = new Properties();
       prop.load(input);
       byte[] publicKey = DataConverter.stringToKeyBytes(prop.getProperty("SERVER_MASTER_PUBLIC_KEY"));
-      boolean verified = AsymmetricKeyManager.verifyData(challenge.getBytes(), signed, publicKey);
+      boolean verified = AsymmetricCrypto.verifyData(challenge.getBytes(), signed, publicKey);
       System.out.println("Server authentication result: " + verified);
     } catch (Exception e) {
       e.printStackTrace();

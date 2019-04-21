@@ -4,7 +4,7 @@ import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-public class AsymmetricKeyManager {
+public class AsymmetricCrypto {
 
   public static KeyPair generateKeyPair() {
     KeyPairGenerator keyGen = null;
