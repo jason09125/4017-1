@@ -21,7 +21,7 @@ public class UserManager {
     User user = DatabaseMock.getUser(username);
     String encryptedPassword = user.getPasswordHash();
     String tfaSecret = user.getTfaSecret();
-    byte[] publicKey = DataConverter.stringToKeyBytes(user.getPublicKey());
+    byte[] publicKey = getPublicKey(username);
 
     BCrypt.Result result = BCrypt.verifyer().verify(plainPassword.toCharArray(), encryptedPassword);
     boolean isPasswordValid = result.verified;
@@ -65,6 +65,11 @@ public class UserManager {
       return null;
     }
     byte[] userPubKey = DataConverter.stringToKeyBytes(user.getPublicKey());
-    return SymmetricCrypto.encrypt(sessionKey, userPubKey);
+    return AsymmetricCrypto.encryptWithPublicKey(sessionKey, userPubKey);
+  }
+
+  public static byte[] getPublicKey(String username) {
+    User user = DatabaseMock.getUser(username);
+    return DataConverter.stringToKeyBytes(user.getPublicKey());
   }
 }

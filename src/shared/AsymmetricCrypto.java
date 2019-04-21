@@ -1,5 +1,6 @@
 package shared;
 
+import javax.crypto.Cipher;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -9,7 +10,7 @@ public class AsymmetricCrypto {
   public static KeyPair generateKeyPair() {
     KeyPairGenerator keyGen = null;
     try {
-      keyGen = KeyPairGenerator.getInstance("DSA");
+      keyGen = KeyPairGenerator.getInstance("RSA");
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();
     }
@@ -22,11 +23,11 @@ public class AsymmetricCrypto {
 
   public static byte[] signData(byte[] data, byte[] privKey) {
     try {
-      PrivateKey privateKey = KeyFactory.getInstance("DSA").generatePrivate(new PKCS8EncodedKeySpec(privKey));
-      Signature dsa = Signature.getInstance("SHA256WithDSA");
-      dsa.initSign(privateKey);
-      dsa.update(data);
-      return dsa.sign();
+      PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privKey));
+      Signature rsa = Signature.getInstance("SHA256WithRSA");
+      rsa.initSign(privateKey);
+      rsa.update(data);
+      return rsa.sign();
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -35,8 +36,8 @@ public class AsymmetricCrypto {
 
   public static boolean verifyData(byte[] data, byte[] digitalSignature, byte[] pubKey) {
     try {
-      PublicKey publicKey = KeyFactory.getInstance("DSA").generatePublic(new X509EncodedKeySpec(pubKey));
-      Signature signature = Signature.getInstance("SHA256WithDSA");
+      PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pubKey));
+      Signature signature = Signature.getInstance("SHA256WithRSA");
       signature.initVerify(publicKey);
       signature.update(data);
       return signature.verify(digitalSignature);
@@ -44,5 +45,56 @@ public class AsymmetricCrypto {
       e.printStackTrace();
     }
     return false;
+  }
+
+  public static byte[] decryptWithPublicKey(byte[] encrypted, byte[] pubKey) {
+    try {
+      PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pubKey));
+      Cipher cipher = Cipher.getInstance("RSA");
+      cipher.init(Cipher.DECRYPT_MODE, publicKey);
+      return cipher.doFinal(encrypted);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public static byte[] encryptWithPrivateKey(byte[] plain, byte[] privKey) {
+    try {
+      PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privKey));
+      Cipher cipher = Cipher.getInstance("RSA");
+      cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+      return cipher.doFinal(plain);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+
+  }
+
+  public static byte[] decryptWithPrivateKey(byte[] encrypted, byte[] privKey) {
+    try {
+      PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privKey));
+      Cipher cipher = Cipher.getInstance("RSA");
+      cipher.init(Cipher.DECRYPT_MODE, privateKey);
+      return cipher.doFinal(encrypted);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+
+  }
+
+  public static byte[] encryptWithPublicKey(byte[] plain, byte[] pubKey) {
+    try {
+      PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pubKey));
+      Cipher cipher = Cipher.getInstance("RSA");
+      cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+      return cipher.doFinal(plain);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+
   }
 }
