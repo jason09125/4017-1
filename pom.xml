@@ -27,6 +27,14 @@
       <artifactId>bcrypt</artifactId>
       <version>0.8.0</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/com.warrenstrange/googleauth -->
+    <dependency>
+      <groupId>com.warrenstrange</groupId>
+      <artifactId>googleauth</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+
+
   </dependencies>
 
 </project>

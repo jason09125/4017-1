@@ -25,6 +25,7 @@ public class FileManager {
     } catch (IOException e) {
       e.printStackTrace();
     }
+    System.out.println();
   }
 
   public static String[] getByKey(String username) {
@@ -35,24 +36,24 @@ public class FileManager {
     for (String line : users) {
       String[] items = line.split("/s*,/s*");
       String username = items[0];
-      String password = items[1];
+      String passwordHash = items[1];
       String tfaSecret = items[2];
-      appendUser(username, password, tfaSecret);
+      appendUser(username, passwordHash, tfaSecret);
     }
   }
 
-  public static void appendUser(String username, String password, String tfaSecret) {
+  public static void appendUser(String username, String passwordHash, String tfaSecret) {
     try {
-      write(username, password, tfaSecret, true);
+      write(username, passwordHash, tfaSecret, true);
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  private static void write(String username, String password, String tfaSecret, boolean append) throws IOException {
+  private static void write(String username, String passwordHash, String tfaSecret, boolean append) throws IOException {
     FileWriter fileWriter = new FileWriter(FILE, append);
     PrintWriter printWriter = new PrintWriter(fileWriter);
-    printWriter.printf("%s, %s, %s", username, password, tfaSecret);
+    printWriter.printf("%s, %s, %s", username, passwordHash, tfaSecret);
     printWriter.println();
     printWriter.close();
   }

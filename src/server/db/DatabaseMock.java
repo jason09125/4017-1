@@ -1,12 +1,19 @@
 package server.db;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
 
 public class DatabaseMock {
 
-  public static void addUser(String username, String plainPassword, String plainSecret) {
+  public static String registerUser(String username, String plainPassword) {
     String hash = BCrypt.withDefaults().hashToString(12, plainPassword.toCharArray());
-    FileManager.appendUser(username, hash, plainSecret);
+
+    GoogleAuthenticator gAuth = new GoogleAuthenticator();
+    String tfaSecret = gAuth.createCredentials().getKey();
+
+    FileManager.appendUser(username, hash, tfaSecret);
+
+    return tfaSecret;
   }
 
   public static String[] getUser(String username) {
