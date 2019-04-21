@@ -55,7 +55,7 @@ public class UserManager {
     return key;
   }
 
-  public byte[] getSessionKey(String username, boolean shouldEncrypt) {
+  public static byte[] getSessionKey(String username, boolean shouldEncrypt) {
     byte[] sessionKey = userSessionKeyMap.get(username);
     if (!shouldEncrypt) {
       return sessionKey;
