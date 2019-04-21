@@ -37,7 +37,7 @@ public class ChatClient implements Runnable {
       }
   }
 
-  public void handle(String msg) {
+  void handle(String msg) {
     if (msg.equals(".bye")) {
       System.out.println("Good bye. Press RETURN to exit ...");
       stop();
@@ -45,7 +45,7 @@ public class ChatClient implements Runnable {
       System.out.println(msg);
   }
 
-  public void start() throws IOException {
+  private void start() throws IOException {
     console = new BufferedReader(new InputStreamReader(System.in));
     streamOut = new DataOutputStream(socket.getOutputStream());
     if (thread == null) {
@@ -55,7 +55,7 @@ public class ChatClient implements Runnable {
     }
   }
 
-  public void stop() {
+  void stop() {
     if (thread != null) {
       thread = null;
     }

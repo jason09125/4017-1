@@ -16,7 +16,7 @@ public class ChatClientThread extends Thread {
     start();
   }
 
-  public void open() {
+  private void open() {
     try {
       streamIn = new DataInputStream(socket.getInputStream());
     } catch (IOException ioe) {
@@ -25,7 +25,7 @@ public class ChatClientThread extends Thread {
     }
   }
 
-  public void close() {
+  void close() {
     try {
       if (streamIn != null) streamIn.close();
     } catch (IOException ioe) {
@@ -50,7 +50,7 @@ public class ChatClientThread extends Thread {
     thread.start();
   }
 
-  public void stopThread() {
+  void stopThread() {
     thread = null;
   }
 }
