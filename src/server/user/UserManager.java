@@ -9,6 +9,10 @@ import shared.DataConverter;
 public class UserManager {
   private static final byte[] CHALLENGE = "CHALLENGE_COMP4017".getBytes();
 
+  public static boolean delete(String username) {
+    return DatabaseMock.deleteUser(username);
+  }
+
   public static boolean auth(String username, String plainPassword, int token, byte[] signedData) {
     User user = DatabaseMock.getUser(username);
     String encryptedPassword = user.getPasswordHash();

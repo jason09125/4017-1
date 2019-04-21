@@ -14,4 +14,8 @@ public class DatabaseMock {
 
   public static void main(String[] args) {
   }
+
+  public static boolean deleteUser(String username) {
+    return FileManager.deleteUser(username);
+  }
 }

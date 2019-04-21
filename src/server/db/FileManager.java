@@ -2,17 +2,14 @@ package server.db;
 
 import server.user.User;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.HashMap;
 
-public class FileManager {
+class FileManager {
   static private String FILE_PATH = "./db";
   static private HashMap<String, User> userMap = new HashMap<>();
 
-  protected static User getByKey(String username) {
+  static User getByKey(String username) {
     User user = userMap.get(username);
     if (user != null) return userMap.get(username);
 
@@ -30,7 +27,7 @@ public class FileManager {
     return null;
   }
 
-  protected static void addUser(User user) {
+  static void addUser(User user) {
     try {
       FileOutputStream fileOut = new FileOutputStream(FILE_PATH + '/' + user.getUsername(), true);
       ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
@@ -41,5 +38,11 @@ public class FileManager {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  static boolean deleteUser(String username) {
+    File file = new File(FILE_PATH + '/' + username);
+
+    return file.delete();
   }
 }
