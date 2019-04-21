@@ -38,15 +38,10 @@ public class Test {
     return keyPair;
   }
 
-  public static void authUser(byte[] privKey) {
+  public static void authUser(int token, byte[] privKey) {
     String username = "Eric";
     String plainPassword = "123456";
 
-    // get this from your Google Authenticator
-    int token = 123456;
-
-    // use private key to sign data, better do this locally on client, never transfer private key to server
-//    byte[] privateKey = DataConverter.stringToKeyBytes("3082014B0201003082012C06072A8648CE3804013082011F02818100FD7F53811D75122952DF4A9C2EECE4E7F611B7523CEF4400C31E3F80B6512669455D402251FB593D8D58FABFC5F5BA30F6CB9B556CD7813B801D346FF26660B76B9950A5A49F9FE8047B1022C24FBBA9D7FEB7C61BF83B57E7C6A8A6150F04FB83F6D3C51EC3023554135A169132F675F3AE2B61D72AEFF22203199DD14801C70215009760508F15230BCCB292B982A2EB840BF0581CF502818100F7E1A085D69B3DDECBBCAB5C36B857B97994AFBBFA3AEA82F9574C0B3D0782675159578EBAD4594FE67107108180B449167123E84C281613B7CF09328CC8A6E13C167A8B547C8D28E0A3AE1E2BB3A675916EA37F0BFA213562F1FB627A01243BCCA4F1BEA8519089A883DFE15AE59F06928B665E807B552564014C3BFECF492A041602142E9A2E7727E2FD822629D88253C47C89DFA9319C");
     byte[] signed = AsymmetricKeyManager.signData("CHALLENGE_COMP4017".getBytes(), privKey);
 
     boolean isAuthenticated = UserManager.auth(username, plainPassword, token, signed);
@@ -54,7 +49,13 @@ public class Test {
   }
 
   public static void main(String[] args) {
-    KeyPair kp = createUser(); // this creates a user
-    authUser(kp.getPrivate().getEncoded()); // this authenticates a user
+    // clean up before testing
+//    UserManager.delete("Eric");
+//
+//    KeyPair kp = createUser(); // this creates a user
+
+    int token = 450087;
+    byte[] privKey = DataConverter.stringToKeyBytes("MIIBSwIBADCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoEFgIUICzNP88jxRETok7dgRGPbT4aUm8=");
+    authUser(token, privKey); // this authenticates a user
   }
 }
