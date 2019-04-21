@@ -37,25 +37,25 @@ public class ClientAuthenticator {
     KeyPair keyPair = AsymmetricCrypto.generateKeyPair();
     PublicKey pubKey = keyPair.getPublic();
     PrivateKey privKey = keyPair.getPrivate();
-    System.out.printf("------------ Public Key --------------\n%s\n\n", DataConverter.keyToString(pubKey));
-    System.out.printf("------------ Private Key -------------\n%s\n\n", DataConverter.keyToString(privKey));
+    System.out.printf("------------ Public Key --------------\n%s\n\n", DataConverter.keyToBase64(pubKey));
+    System.out.printf("------------ Private Key -------------\n%s\n\n", DataConverter.keyToBase64(privKey));
   }
 
   public ClientAuthenticator(String configPath) { // sample path: "./client-config/config.properties"
     try (InputStream input = new FileInputStream(configPath)) {
       Properties prop = new Properties();
       prop.load(input);
-      this.selfPublicKey = DataConverter.stringToBytes(prop.getProperty("CLIENT_MASTER_PUBLIC_KEY"));
-      this.selfPrivateKey = DataConverter.stringToBytes(prop.getProperty("CLIENT_MASTER_PRIVATE_KEY"));
-      this.serverPublicKey = DataConverter.stringToBytes(prop.getProperty("SERVER_MASTER_PUBLIC_KEY"));
+      this.selfPublicKey = DataConverter.base64ToBytes(prop.getProperty("CLIENT_MASTER_PUBLIC_KEY"));
+      this.selfPrivateKey = DataConverter.base64ToBytes(prop.getProperty("CLIENT_MASTER_PRIVATE_KEY"));
+      this.serverPublicKey = DataConverter.base64ToBytes(prop.getProperty("SERVER_MASTER_PUBLIC_KEY"));
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  public String getLoginCommand(String username, String plainPassword, int token) {
-    byte[] signature = AsymmetricCrypto.signData("CHALLENGE_COMP4017".getBytes(), this.selfPrivateKey);
-    String signatureStr = DataConverter.bytesToString(signature);
+  public String getLoginCommand(String username, String plainPassword, int token, String challenge) {
+    byte[] signature = AsymmetricCrypto.signData(challenge.getBytes(), this.selfPrivateKey);
+    String signatureStr = DataConverter.bytesToBase64(signature);
 
     return "COMMAND LOGIN " + username + " " + plainPassword + " " + token + " " + signatureStr;
   }

@@ -11,13 +11,11 @@ import java.util.HashMap;
 
 public class UserManager {
   private static HashMap<String, byte[]> userSessionKeyMap = new HashMap<>();
-  private static final byte[] CHALLENGE = "CHALLENGE_COMP4017".getBytes();
-
   public static boolean delete(String username) {
     return DatabaseMock.deleteUser(username);
   }
 
-  public static boolean auth(String username, String plainPassword, int token, byte[] signedData) {
+  public static boolean auth(String username, String plainPassword, int token, String challenge, byte[] signedData) {
     User user = DatabaseMock.getUser(username);
     String encryptedPassword = user.getPasswordHash();
     String tfaSecret = user.getTfaSecret();
@@ -29,7 +27,7 @@ public class UserManager {
     GoogleAuthenticator gAuth = new GoogleAuthenticator();
     boolean isTokenValid = gAuth.authorize(tfaSecret, token);
 
-    boolean isDigitalSignatureValid = AsymmetricCrypto.verifyData(CHALLENGE, signedData, publicKey);
+    boolean isDigitalSignatureValid = AsymmetricCrypto.verifyData(challenge.getBytes(), signedData, publicKey);
 
     System.out.println("> Logging in: " + username);
     System.out.println(">>> Password OK: " + isPasswordValid);
@@ -64,12 +62,12 @@ public class UserManager {
     if (user == null) {
       return null;
     }
-    byte[] userPubKey = DataConverter.stringToBytes(user.getPublicKey());
+    byte[] userPubKey = DataConverter.base64ToBytes(user.getPublicKey());
     return AsymmetricCrypto.encryptWithPublicKey(sessionKey, userPubKey);
   }
 
   public static byte[] getPublicKey(String username) {
     User user = DatabaseMock.getUser(username);
-    return DataConverter.stringToBytes(user.getPublicKey());
+    return DataConverter.base64ToBytes(user.getPublicKey());
   }
 }

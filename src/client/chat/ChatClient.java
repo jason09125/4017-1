@@ -16,7 +16,8 @@ public class ChatClient implements Runnable {
   private BufferedReader console = null;
   private DataOutputStream streamOut = null;
   private ChatClientThread client = null;
-  ClientAuthenticator clientAuthenticator;
+  private ClientAuthenticator clientAuthenticator;
+  private String challenge;
 
   public ChatClient(String serverName, int serverPort) {
     this.clientAuthenticator = new ClientAuthenticator("./client-config/config.properties");
@@ -46,7 +47,7 @@ public class ChatClient implements Runnable {
             String username = items[1];
             String password = items[2];
             int token = Integer.parseInt(items[3]);
-            String cmd = clientAuthenticator.getLoginCommand(username, password, token);
+            String cmd = clientAuthenticator.getLoginCommand(username, password, token, this.challenge);
             streamOut.writeUTF(cmd);
             streamOut.flush();
             continue;
@@ -63,19 +64,28 @@ public class ChatClient implements Runnable {
 
   void handle(String msg) {
     System.out.println("Handling: " + msg);
+    if (msg.matches("^COMMAND .*$")) {
+      String[] items = msg.split("\\s+");
+      String action = items[1];
+      if (action.equals("CHALLENGE")) {
+        this.challenge = items[2];
+      }
+      return;
+    }
     if (msg.matches("^RESPONSE .*$")) {
       String[] items = msg.split("\\s+");
       String action = items[1];
       if (action.equals("AUTH")) {
         String result = items[2];
-        if (result.equals("OK")) {
+        if (result.equals("200")) {
           System.out.println(">> [Server]: Authenticated");
           String sessionKey = items[3];
-          clientAuthenticator.setSessionKey(DataConverter.stringToBytes(sessionKey));
+          clientAuthenticator.setSessionKey(DataConverter.base64ToBytes(sessionKey));
         } else {
-          System.out.println(">> [Server]: Authentication failed");
+          System.out.println(">> [Server]: Authentication failed - " + result);
         }
       }
+      return;
     }
 
     if (msg.equals(".bye")) {

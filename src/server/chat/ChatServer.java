@@ -6,9 +6,11 @@ import shared.DataConverter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class ChatServer implements Runnable {
   private ChatServerThread clients[] = new ChatServerThread[50];
+  private HashMap<Integer, String> clientChallengeMap = new HashMap<>();
   private ServerSocket server = null;
   private volatile Thread thread = null;
   private int clientCount = 0;
@@ -58,7 +60,7 @@ public class ChatServer implements Runnable {
   }
 
   synchronized void handle(int ID, String input) {
-    System.out.println(">>> Handling: " + input);
+    System.out.printf(">>> Handling %s: %s\n", ID, input);
 
     if (input.matches("^COMMAND .*$")) {
       String items[] = input.split(" ");
@@ -70,14 +72,15 @@ public class ChatServer implements Runnable {
         String username = items[2];
         String password = items[3];
         int token = Integer.parseInt(items[4]);
-        byte[] signature = DataConverter.stringToBytes(items[5]);
-        boolean authenticated = UserManager.auth(username, password, token, signature);
+        byte[] signature = DataConverter.base64ToBytes(items[5]);
+        String challenge = clientChallengeMap.get(ID);
+        boolean authenticated = UserManager.auth(username, password, token, challenge, signature);
         if (authenticated) {
           byte[] key = UserManager.generateSessionKey(username);
-          String keyStr = DataConverter.bytesToString(key);
-          clients[findClient(ID)].send("RESPONSE AUTH OK " + keyStr);
+          String keyStr = DataConverter.bytesToBase64(key);
+          clients[findClient(ID)].send("RESPONSE AUTH 200 " + keyStr);
         } else {
-          clients[findClient(ID)].send("RESPONSE AUTH FAILED");
+          clients[findClient(ID)].send("RESPONSE AUTH 401");
         }
         return;
       }
@@ -118,6 +121,14 @@ public class ChatServer implements Runnable {
       try {
         clients[clientCount].open();
         clients[clientCount].start();
+
+        // ---- send challenge ----
+        String challenge = Double.toString(Math.random());
+        int clientId = clients[clientCount].getID();
+        clientChallengeMap.put(clientId, challenge);
+        clients[clientCount].send("COMMAND CHALLENGE " + challenge);
+        System.out.printf(">>> Challenging client %s: %s\n", clientId, challenge);
+
         clientCount++;
       } catch (IOException ioe) {
         System.out.println("Error opening thread: " + ioe);

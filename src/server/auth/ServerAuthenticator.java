@@ -34,7 +34,7 @@ public class ServerAuthenticator {
   public static byte[] signChallenge(String challenge) {
     try {
       String privateKeyStr = readProp("SERVER_MASTER_PRIVATE_KEY");
-      return AsymmetricCrypto.signData(challenge.getBytes("utf-8"), DataConverter.stringToBytes(privateKeyStr));
+      return AsymmetricCrypto.signData(challenge.getBytes("utf-8"), DataConverter.base64ToBytes(privateKeyStr));
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     }
@@ -43,6 +43,6 @@ public class ServerAuthenticator {
 
   public static byte[] encryptWithPrivateKey(byte[] data) {
     String privateKeyStr = readProp("SERVER_MASTER_PRIVATE_KEY");
-    return AsymmetricCrypto.encryptWithPrivateKey(data, DataConverter.stringToBytes(privateKeyStr));
+    return AsymmetricCrypto.encryptWithPrivateKey(data, DataConverter.base64ToBytes(privateKeyStr));
   }
 }
