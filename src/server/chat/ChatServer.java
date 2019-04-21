@@ -11,6 +11,8 @@ import java.util.HashMap;
 
 public class ChatServer implements Runnable {
   private ChatServerThread clients[] = new ChatServerThread[50];
+  private HashMap<Integer, String> clientUsernameMap = new HashMap<>();
+  private HashMap<Integer, Boolean> clientAuthMap = new HashMap<>();
   private HashMap<Integer, String> clientChallengeMap = new HashMap<>();
   private ServerSocket server = null;
   private volatile Thread thread = null;
@@ -88,12 +90,21 @@ public class ChatServer implements Runnable {
           byte[] key = UserManager.getSessionKey(username, true);
           String sessionKeyStr = DataConverter.bytesToBase64(key);
           clients[findClient(ID)].send("RESPONSE AUTH 200 " + sessionKeyStr);
+          clientUsernameMap.put(ID, username);
+          clientAuthMap.put(ID, true);
 
           // broadcast client's public key
           String pubKeyStr = DataConverter.bytesToBase64(UserManager.getPublicKey(username));
           System.out.printf("Authenticated - Broadcasting user's public key to other connected clients: %s %s\n", username, pubKeyStr);
           for (int i = 0; i < clientCount; i++) {
-            // todo: check authentication before sending this, filter out those not authenticated
+            // check authentication before sending this, filter out those not authenticated
+            if (!clientAuthMap.get(clients[i].getID())) {
+              return;
+            }
+            // do not send to the new client itself
+            if (clients[i].getID() == ID) {
+              return;
+            }
             clients[i].send("COMMAND NEW_USER " + username + " " + pubKeyStr);
           }
 
@@ -117,6 +128,11 @@ public class ChatServer implements Runnable {
     int pos = findClient(ID);
     if (pos >= 0) {
       ChatServerThread toTerminate = clients[pos];
+      int idToRemove = clients[pos].getID();
+      clientChallengeMap.remove(idToRemove);
+      clientAuthMap.remove(idToRemove);
+      clientUsernameMap.remove(idToRemove);
+
       System.out.println("Removing client thread " + ID + " at " + pos);
       if (pos < clientCount - 1)
         for (int i = pos + 1; i < clientCount; i++) {
