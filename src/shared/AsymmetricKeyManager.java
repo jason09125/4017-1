@@ -1,6 +1,8 @@
 package shared;
 
 import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 public class AsymmetricKeyManager {
 
@@ -18,8 +20,9 @@ public class AsymmetricKeyManager {
     return null;
   }
 
-  public static byte[] signData(byte[] data, PrivateKey privateKey) {
+  public static byte[] signData(byte[] data, byte[] privKey) {
     try {
+      PrivateKey privateKey = KeyFactory.getInstance("DSA").generatePrivate(new PKCS8EncodedKeySpec(privKey));
       Signature dsa = Signature.getInstance("SHA256WithDSA");
       dsa.initSign(privateKey);
       dsa.update(data);
@@ -30,8 +33,9 @@ public class AsymmetricKeyManager {
     return null;
   }
 
-  public static boolean verifyData(byte[] data, PublicKey publicKey, byte[] digitalSignature) {
+  public static boolean verifyData(byte[] data, byte[] digitalSignature, byte[] pubKey) {
     try {
+      PublicKey publicKey = KeyFactory.getInstance("DSA").generatePublic(new X509EncodedKeySpec(pubKey));
       Signature signature = Signature.getInstance("SHA256WithDSA");
       signature.initVerify(publicKey);
       signature.update(data);
@@ -40,13 +44,5 @@ public class AsymmetricKeyManager {
       e.printStackTrace();
     }
     return false;
-  }
-
-  private static String convertBytesToHex(byte[] bytes) {
-    StringBuilder sb = new StringBuilder();
-    for (byte b : bytes) {
-      sb.append(String.format("%02X", b));
-    }
-    return sb.toString();
   }
 }
