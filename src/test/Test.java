@@ -1,10 +1,14 @@
 package test;
 
+import server.auth.ServerAuthenticator;
 import server.user.UserManager;
 import shared.AsymmetricKeyManager;
 import shared.DataConverter;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.KeyPair;
+import java.util.Properties;
 
 public class Test {
 
@@ -48,14 +52,31 @@ public class Test {
     System.out.println("Server: authentication status is " + isAuthenticated);
   }
 
+  public static void authServer() {
+    String challenge = "kdlghfasdm9r04c90rmq49mc9dsm-fadsf";
+    byte[] signed = ServerAuthenticator.signChallenge(challenge);
+
+    try (InputStream input = new FileInputStream("./client-config/config.properties")) {
+      Properties prop = new Properties();
+      prop.load(input);
+      byte[] publicKey = DataConverter.stringToKeyBytes(prop.getProperty("SERVER_MASTER_PUBLIC_KEY"));
+      boolean verified = AsymmetricKeyManager.verifyData(challenge.getBytes(), signed, publicKey);
+      System.out.println("Server authentication result: " + verified);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   public static void main(String[] args) {
     // clean up before testing
 //    UserManager.delete("Eric");
 //
 //    KeyPair kp = createUser(); // this creates a user
 
-    int token = 450087;
-    byte[] privKey = DataConverter.stringToKeyBytes("MIIBSwIBADCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoEFgIUICzNP88jxRETok7dgRGPbT4aUm8=");
-    authUser(token, privKey); // this authenticates a user
+//    int token = 450087;
+//    byte[] privKey = DataConverter.stringToKeyBytes("MIIBSwIBADCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoEFgIUICzNP88jxRETok7dgRGPbT4aUm8=");
+//    authUser(token, privKey); // this authenticates a user
+
+    authServer();
   }
 }
