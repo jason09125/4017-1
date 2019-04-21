@@ -29,8 +29,10 @@ public class Test {
 
     KeyPair keyPair = AsymmetricCrypto.generateKeyPair();
 
-    System.out.println("Client: Please store the following credentials secretly");
+    System.out.println("Client: Please store the private key and 2FA secret safely");
     System.out.printf("------ Private Key ---------\n%s\n\n", DataConverter.keyToString(keyPair.getPrivate()));
+
+    System.out.printf("------ Public Key ---------\n%s\n\n", DataConverter.keyToString(keyPair.getPublic()));
 
     System.out.println("Client: Start to ask server to register");
     String twoFactorAuthSecret = UserManager.register(username, plainPassword, DataConverter.keyToString(keyPair.getPublic()));
@@ -59,7 +61,7 @@ public class Test {
     try (InputStream input = new FileInputStream("./client-config/config.properties")) {
       Properties prop = new Properties();
       prop.load(input);
-      byte[] publicKey = DataConverter.stringToKeyBytes(prop.getProperty("SERVER_MASTER_PUBLIC_KEY"));
+      byte[] publicKey = DataConverter.stringToBytes(prop.getProperty("SERVER_MASTER_PUBLIC_KEY"));
       boolean verified = AsymmetricCrypto.verifyData(challenge.getBytes(), signed, publicKey);
       System.out.println("Server authentication result: " + verified);
     } catch (Exception e) {
@@ -71,12 +73,13 @@ public class Test {
 //    UserManager.delete("Eric"); // clean up before testing
 //    KeyPair kp = createUser(); // this creates a user
 
+//    System.out.println(DataConverter.keyToString(kp.getPublic()));
 //    System.out.println(DataConverter.keyToString(kp.getPrivate()));
 
-    // This is the secret for 2FA------->>> JUA7N3KIJAQKEKXD
-    int token =500383;
-    byte[] privKey = DataConverter.stringToKeyBytes("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJSJfdWQfCEb41SSSg2VG2P4En8C1Y6plTZFvYnrNkRGvZscf1GH8AhcF7wfSH6jR/ikLPFA+B61Oqmr6EynbtfeAbROJTKuo+Mll2n2y7Q1/4le1UL5aVO7G0WliTNn0yQ4eP1pdjzNhXwPUNtubidO5eYUBv/t5+m/iBM0NjNvAgMBAAECgYBJqPVSF1i3QpE1u2Yl3i+7H6ZsfgdRvB9Wzrbz0kUTDtGwPi2VTQhn3OOYUxssUeS7FQ+EhGeHMvBoe+uzN8TrXpxaqs7V+SDppVpDRQmLfzz2tl20aLGHGeBEoyO/3E14ymizZki3K8p0qfb0LLdsneaElIQe23dD4GxnaeSNoQJBAMi4BCEv6yGCMsEt3mk7BdTLO5HKP8d+OFdd4v5CphVnzeh1kexd8n/o2hcifhe1UOKM7pFqXTIKQZMpaMeyieMCQQC9clKy6r/xRZYAoM4CGw8KBNaEopL6KoCItAoO9uCAeRjvvuBb0mUMmUH+ZCGiYAnVVoVtr2tQqPMh8EOYoBYFAkAtNIR5lPk3ysLzjwkQWiKuEjeQViSXIW4+/v4olYoiOAa/2/rJaT88X4z+uN39KPDWlTcFuRbUNksegaz/jM5RAkEAoG7MchAy9FQFsAp963KWzdlDAZfb+Fc9+obdbcbMYIAtCfsPbTNDt+Oh65lIkoXaTfyziivgKbKqE7ewxvPrMQJAPequMIu4gQPE+KzC6Q/a4sou+rzcWKcWYg0ZOSvbV4LThztvBlckTu4sO0K03k75fz2UMG19p3jWVEEkAMzwww==");
-    authUser(token, privKey); // this authenticates a user
+    // This is the secret for 2FA------->>> 4ZC2262UODCPBI3A
+//    int token =500383;
+//    byte[] privKey = DataConverter.stringToBytes("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAI48+BwLiYLbrMLe0K3xNtGpFgLa3VLCbluYBb2MFaFbGUCpRebbsBJQajViEmcCHW7zg7V2agxxjwpS1m0kX/sXDoilxZYe7WDjluEj6cqCSNXYHGuByBKJRfyazq3FvjvQh6n/Q2RFmf3HdNuJ9ZCrGMfYUxV5X06FR+ZK9cjXAgMBAAECgYB0ev9f0B7jV8xJpThVSbTvyz0oR1152ZmQTpVc3SwVgEnUxwpkfMHarZncb5zMWFIMO0U/xGIiIJjYBnBs3p3t+XJyiaZ/J6D6YaTW/3dc1cwBtyUiPIWdBdQEQMni12OJrUiQHzeZPNvk1r3+ZNde+WVmNsgLGCRUKnlV91KLyQJBAPfZUvZ3Kuz486YhqGVLJeUJyVOs464pZHO0NFe634G1ImmcWrpmXIg2JHfwYMFLeodh99lJRUooa9ia5QECXUUCQQCS6n4qBf4HX1/WlmTQH7GAgM4tgOapBRa/8roYmtTPEa9T/aJL2k3tiGXcGphQyVI5KHzayj/DTRfO6Y2UkelrAkAWajIllhtsuQsYAD1Bg+1WbG8nwSAKNTYffLGrKXxjN6V4Fari5rUBoJvluPiXIqNfMQ4AOa8piMRQH5oMYFFdAkBGAS50374XzT5hhfArq65syPN1g0Jlr2MTu5kpOD3HHWop32WCN1eCo8fFhXamqAdh7QTxTAXuDcIWeftYm95ZAkEAhvP8l+HhqJGylxssqJ3OpGtCPD+yNGSpkejIH+MpajIv8cGeKRSg00uXM2G4nx+iWHuMvO1+aBYaJyxLT5N4pg==");
+//    authUser(token, privKey); // this authenticates a user
 
 //    authServer();
   }

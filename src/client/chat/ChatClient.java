@@ -1,7 +1,13 @@
 package client.chat;
 
-import java.io.*;
-import java.net.*;
+import client.auth.ClientAuthenticator;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class ChatClient implements Runnable {
   private Socket socket = null;
@@ -9,8 +15,11 @@ public class ChatClient implements Runnable {
   private BufferedReader console = null;
   private DataOutputStream streamOut = null;
   private ChatClientThread client = null;
+  ClientAuthenticator clientAuthenticator;
 
   public ChatClient(String serverName, int serverPort) {
+    this.clientAuthenticator = new ClientAuthenticator("./client-config/config.properties");
+
     System.out.println("Establishing connection. Please wait ...");
     try {
       socket = new Socket(serverName, serverPort);
@@ -28,7 +37,21 @@ public class ChatClient implements Runnable {
     while (thread == thisThread)
       while (thread != null) {
         try {
-          streamOut.writeUTF(console.readLine());
+          String line = console.readLine();
+
+          if (line.matches("^\\.login .*$")) { // ---- send authentication request ----
+            System.out.println("Logging in");
+            String[] items = line.split("\\s+");
+            String username = items[1];
+            String password = items[2];
+            int token = Integer.parseInt(items[3]);
+            String cmd = clientAuthenticator.getLoginCommand(username, password, token);
+            streamOut.writeUTF(cmd);
+            streamOut.flush();
+            continue;
+          }
+
+          streamOut.writeUTF(line);
           streamOut.flush();
         } catch (IOException ioe) {
           System.out.println("Sending error: " + ioe.getMessage());

@@ -46,19 +46,22 @@ public class ClientAuthenticator {
     try (InputStream input = new FileInputStream(configPath)) {
       Properties prop = new Properties();
       prop.load(input);
-      this.selfPublicKey = DataConverter.stringToKeyBytes(prop.getProperty("CLIENT_MASTER_PUBLIC_KEY"));
-      this.selfPrivateKey = DataConverter.stringToKeyBytes(prop.getProperty("CLIENT_MASTER_PRIVATE_KEY"));
-      this.serverPublicKey = DataConverter.stringToKeyBytes(prop.getProperty("SERVER_MASTER_PUBLIC_KEY"));
+      this.selfPublicKey = DataConverter.stringToBytes(prop.getProperty("CLIENT_MASTER_PUBLIC_KEY"));
+      this.selfPrivateKey = DataConverter.stringToBytes(prop.getProperty("CLIENT_MASTER_PRIVATE_KEY"));
+      this.serverPublicKey = DataConverter.stringToBytes(prop.getProperty("SERVER_MASTER_PUBLIC_KEY"));
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  public void login(String username, String plainPassword, int token) {
-    byte[] signed = AsymmetricCrypto.signData("CHALLENGE_COMP4017".getBytes(), this.selfPrivateKey);
-    // todo: send data through network and retrieve session key
-    this.sessionKey = null;
+  public String getLoginCommand(String username, String plainPassword, int token) {
+    byte[] signature = AsymmetricCrypto.signData("CHALLENGE_COMP4017".getBytes(), this.selfPrivateKey);
+    String signatureStr = DataConverter.bytesToString(signature);
+
+    return "COMMAND LOGIN " + username + " " + plainPassword + " " + token + " " + signatureStr;
   }
+
+  // todo: send data through network and retrieve session key - set this.sessionKey;
 
   private boolean isEmptyString(String str) {
     return str == null || str.length() == 0;

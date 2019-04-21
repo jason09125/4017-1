@@ -1,5 +1,9 @@
 package server.chat;
 
+import server.auth.ServerAuthenticator;
+import server.user.UserManager;
+import shared.DataConverter;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -55,6 +59,27 @@ public class ChatServer implements Runnable {
   }
 
   synchronized void handle(int ID, String input) {
+    System.out.println(">>> Handling: " + input);
+
+    if (input.matches("^COMMAND .*$")) {
+      String items[] = input.split(" ");
+      if (items.length < 2) {
+        return;
+      }
+      String action = items[1];
+      if (action.equals("LOGIN")) {
+        String username = items[2];
+        String password = items[3];
+        int token = Integer.parseInt(items[4]);
+        byte[] signature = DataConverter.stringToBytes(items[5]);
+        boolean authenticated = UserManager.auth(username, password, token, signature);
+        if (authenticated) {
+
+        }
+        return;
+      }
+    }
+
     if (input.equals(".bye")) {
       clients[findClient(ID)].send(".bye");
       remove(ID);

@@ -64,12 +64,12 @@ public class UserManager {
     if (user == null) {
       return null;
     }
-    byte[] userPubKey = DataConverter.stringToKeyBytes(user.getPublicKey());
+    byte[] userPubKey = DataConverter.stringToBytes(user.getPublicKey());
     return AsymmetricCrypto.encryptWithPublicKey(sessionKey, userPubKey);
   }
 
   public static byte[] getPublicKey(String username) {
     User user = DatabaseMock.getUser(username);
-    return DataConverter.stringToKeyBytes(user.getPublicKey());
+    return DataConverter.stringToBytes(user.getPublicKey());
   }
 }
