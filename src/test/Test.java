@@ -68,15 +68,16 @@ public class Test {
   }
 
   public static void main(String[] args) {
-    // clean up before testing
-//    UserManager.delete("Eric");
-//
+//    UserManager.delete("Eric"); // clean up before testing
 //    KeyPair kp = createUser(); // this creates a user
 
-//    int token = 450087;
-//    byte[] privKey = DataConverter.stringToKeyBytes("MIIBSwIBADCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoEFgIUICzNP88jxRETok7dgRGPbT4aUm8=");
-//    authUser(token, privKey); // this authenticates a user
+//    System.out.println(DataConverter.keyToString(kp.getPrivate()));
 
-    authServer();
+    // This is the secret for 2FA------->>> JUA7N3KIJAQKEKXD
+    int token =500383;
+    byte[] privKey = DataConverter.stringToKeyBytes("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJSJfdWQfCEb41SSSg2VG2P4En8C1Y6plTZFvYnrNkRGvZscf1GH8AhcF7wfSH6jR/ikLPFA+B61Oqmr6EynbtfeAbROJTKuo+Mll2n2y7Q1/4le1UL5aVO7G0WliTNn0yQ4eP1pdjzNhXwPUNtubidO5eYUBv/t5+m/iBM0NjNvAgMBAAECgYBJqPVSF1i3QpE1u2Yl3i+7H6ZsfgdRvB9Wzrbz0kUTDtGwPi2VTQhn3OOYUxssUeS7FQ+EhGeHMvBoe+uzN8TrXpxaqs7V+SDppVpDRQmLfzz2tl20aLGHGeBEoyO/3E14ymizZki3K8p0qfb0LLdsneaElIQe23dD4GxnaeSNoQJBAMi4BCEv6yGCMsEt3mk7BdTLO5HKP8d+OFdd4v5CphVnzeh1kexd8n/o2hcifhe1UOKM7pFqXTIKQZMpaMeyieMCQQC9clKy6r/xRZYAoM4CGw8KBNaEopL6KoCItAoO9uCAeRjvvuBb0mUMmUH+ZCGiYAnVVoVtr2tQqPMh8EOYoBYFAkAtNIR5lPk3ysLzjwkQWiKuEjeQViSXIW4+/v4olYoiOAa/2/rJaT88X4z+uN39KPDWlTcFuRbUNksegaz/jM5RAkEAoG7MchAy9FQFsAp963KWzdlDAZfb+Fc9+obdbcbMYIAtCfsPbTNDt+Oh65lIkoXaTfyziivgKbKqE7ewxvPrMQJAPequMIu4gQPE+KzC6Q/a4sou+rzcWKcWYg0ZOSvbV4LThztvBlckTu4sO0K03k75fz2UMG19p3jWVEEkAMzwww==");
+    authUser(token, privKey); // this authenticates a user
+
+//    authServer();
   }
 }
