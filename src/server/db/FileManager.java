@@ -1,4 +1,4 @@
-package server.file;
+package server.db;
 
 import java.io.*;
 import java.util.HashMap;
@@ -8,11 +8,7 @@ public class FileManager {
   // username -> [password, tfaSecret]
   static private HashMap<String, String[]> userMap = new HashMap<>();
 
-  public static String[] getByKey(String username) {
-    return userMap.get(username);
-  }
-
-  public static void init() {
+  static {
     String line;
 
     BufferedReader bufferReader;
@@ -29,6 +25,10 @@ public class FileManager {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public static String[] getByKey(String username) {
+    return userMap.get(username);
   }
 
   public static void appendUsers(String[] users) throws IOException {
