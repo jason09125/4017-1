@@ -33,7 +33,6 @@ public class ClientAuthenticator {
     return sessionKey;
   }
 
-
   public static void generateKeyPair() { // helper function for new users
     KeyPair keyPair = AsymmetricCrypto.generateKeyPair();
     PublicKey pubKey = keyPair.getPublic();
@@ -61,7 +60,9 @@ public class ClientAuthenticator {
     return "COMMAND LOGIN " + username + " " + plainPassword + " " + token + " " + signatureStr;
   }
 
-  // todo: send data through network and retrieve session key - set this.sessionKey;
+  public void setSessionKey(byte[] key) {
+    this.sessionKey = key;
+  }
 
   private boolean isEmptyString(String str) {
     return str == null || str.length() == 0;

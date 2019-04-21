@@ -1,6 +1,7 @@
 package client.chat;
 
 import client.auth.ClientAuthenticator;
+import shared.DataConverter;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -61,11 +62,28 @@ public class ChatClient implements Runnable {
   }
 
   void handle(String msg) {
+    System.out.println("Handling: " + msg);
+    if (msg.matches("^RESPONSE .*$")) {
+      String[] items = msg.split("\\s+");
+      String action = items[1];
+      if (action.equals("AUTH")) {
+        String result = items[2];
+        if (result.equals("OK")) {
+          System.out.println(">> [Server]: Authenticated");
+          String sessionKey = items[3];
+          clientAuthenticator.setSessionKey(DataConverter.stringToBytes(sessionKey));
+        } else {
+          System.out.println(">> [Server]: Authentication failed");
+        }
+      }
+    }
+
     if (msg.equals(".bye")) {
       System.out.println("Good bye. Press RETURN to exit ...");
       stop();
-    } else
+    } else {
       System.out.println(msg);
+    }
   }
 
   private void start() throws IOException {

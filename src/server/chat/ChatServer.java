@@ -1,6 +1,5 @@
 package server.chat;
 
-import server.auth.ServerAuthenticator;
 import server.user.UserManager;
 import shared.DataConverter;
 
@@ -74,7 +73,11 @@ public class ChatServer implements Runnable {
         byte[] signature = DataConverter.stringToBytes(items[5]);
         boolean authenticated = UserManager.auth(username, password, token, signature);
         if (authenticated) {
-
+          byte[] key = UserManager.generateSessionKey(username);
+          String keyStr = DataConverter.bytesToString(key);
+          clients[findClient(ID)].send("RESPONSE AUTH OK " + keyStr);
+        } else {
+          clients[findClient(ID)].send("RESPONSE AUTH FAILED");
         }
         return;
       }
