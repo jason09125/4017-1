@@ -1,5 +1,6 @@
 package server.chat;
 
+import server.auth.ServerAuthenticator;
 import server.user.UserManager;
 import shared.DataConverter;
 
@@ -68,6 +69,13 @@ public class ChatServer implements Runnable {
         return;
       }
       String action = items[1];
+      if (action.equals("SERVER_AUTH")) {
+        String challenge = items[2];
+        System.out.printf("Challenged by client %s: %s\n", ID, challenge);
+        String signatureStr = DataConverter.bytesToBase64(ServerAuthenticator.signChallenge(challenge));
+        System.out.println("Digital signature generated: " + signatureStr);
+        clients[findClient(ID)].send("RESPONSE SERVER_SIGNATURE 200 " + signatureStr);
+      }
       if (action.equals("LOGIN")) {
         String username = items[2];
         String password = items[3];
@@ -82,8 +90,8 @@ public class ChatServer implements Runnable {
         } else {
           clients[findClient(ID)].send("RESPONSE AUTH 401");
         }
-        return;
       }
+      return;
     }
 
     if (input.equals(".bye")) {

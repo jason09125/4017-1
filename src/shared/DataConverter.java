@@ -3,6 +3,8 @@ package shared;
 import java.security.Key;
 import java.util.Base64;
 
+// cipher text strings or keys are base64 string, and should use this converter
+// for plain text strings, use getBytes() to convert to bytes
 public class DataConverter {
   public static String keyToBase64(Key key) {
     return bytesToBase64(key.getEncoded());

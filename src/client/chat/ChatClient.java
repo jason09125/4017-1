@@ -1,6 +1,7 @@
 package client.chat;
 
 import client.auth.ClientAuthenticator;
+import shared.AsymmetricCrypto;
 import shared.DataConverter;
 
 import java.io.BufferedReader;
@@ -17,7 +18,8 @@ public class ChatClient implements Runnable {
   private DataOutputStream streamOut = null;
   private ChatClientThread client = null;
   private ClientAuthenticator clientAuthenticator;
-  private String challenge;
+  private String challengeForServer;
+  private String challengeFromServer;
 
   public ChatClient(String serverName, int serverPort) {
     this.clientAuthenticator = new ClientAuthenticator("./client-config/config.properties");
@@ -47,7 +49,7 @@ public class ChatClient implements Runnable {
             String username = items[1];
             String password = items[2];
             int token = Integer.parseInt(items[3]);
-            String cmd = clientAuthenticator.getLoginCommand(username, password, token, this.challenge);
+            String cmd = clientAuthenticator.getLoginCommand(username, password, token, this.challengeFromServer);
             streamOut.writeUTF(cmd);
             streamOut.flush();
             continue;
@@ -68,7 +70,8 @@ public class ChatClient implements Runnable {
       String[] items = msg.split("\\s+");
       String action = items[1];
       if (action.equals("CHALLENGE")) {
-        this.challenge = items[2];
+        System.out.println("Challenge from server received, will provide digital signature when login");
+        this.challengeFromServer = items[2];
       }
       return;
     }
@@ -85,6 +88,18 @@ public class ChatClient implements Runnable {
           System.out.println(">> [Server]: Authentication failed - " + result);
         }
       }
+      if (action.equals("SERVER_SIGNATURE")) {
+        String result = items[2];
+        if (result.equals("200")) {
+          byte[] signature = DataConverter.base64ToBytes(items[3]);
+          boolean verified = AsymmetricCrypto.verifyData(this.challengeForServer.getBytes(), signature, clientAuthenticator.getServerPublicKey());
+          if (verified) {
+            System.out.println("Server is verified by digital signature, safe to log in");
+          } else {
+            System.out.println("[WARNING] Server has INVALID digital signature, this server could be forged");
+          }
+        }
+      }
       return;
     }
 
@@ -99,6 +114,13 @@ public class ChatClient implements Runnable {
   private void start() throws IOException {
     console = new BufferedReader(new InputStreamReader(System.in));
     streamOut = new DataOutputStream(socket.getOutputStream());
+
+    // ---- request to authenticate server ----
+    this.challengeForServer = Double.toString(Math.random());
+    String cmd = "COMMAND SERVER_AUTH " + this.challengeForServer;
+    System.out.println("Challenging server, checking it's identity");
+    streamOut.writeUTF(cmd);
+
     if (thread == null) {
       client = new ChatClientThread(this, socket);
       thread = new Thread(this);
