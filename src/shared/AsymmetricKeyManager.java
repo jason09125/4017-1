@@ -2,7 +2,7 @@ package shared;
 
 import java.security.*;
 
-public class KeyPairManager {
+public class AsymmetricKeyManager {
 
   public static KeyPair generateKeyPair() {
     KeyPairGenerator keyGen = null;
@@ -26,8 +26,8 @@ public class KeyPairManager {
       return dsa.sign();
     } catch (Exception e) {
       e.printStackTrace();
-      return null;
     }
+    return null;
   }
 
   public static boolean verifyData(byte[] data, PublicKey publicKey, byte[] digitalSignature) {
@@ -38,8 +38,8 @@ public class KeyPairManager {
       return signature.verify(digitalSignature);
     } catch (Exception e) {
       e.printStackTrace();
-      return false;
     }
+    return false;
   }
 
   private static String convertBytesToHex(byte[] bytes) {
