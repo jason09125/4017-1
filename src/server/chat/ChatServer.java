@@ -86,8 +86,17 @@ public class ChatServer implements Runnable {
         if (authenticated) {
           UserManager.generateSessionKey(username);
           byte[] key = UserManager.getSessionKey(username, true);
-          String keyStr = DataConverter.bytesToBase64(key);
-          clients[findClient(ID)].send("RESPONSE AUTH 200 " + keyStr);
+          String sessionKeyStr = DataConverter.bytesToBase64(key);
+          clients[findClient(ID)].send("RESPONSE AUTH 200 " + sessionKeyStr);
+
+          // broadcast client's public key
+          String pubKeyStr = DataConverter.bytesToBase64(UserManager.getPublicKey(username));
+          System.out.printf("Authenticated - Broadcasting user's public key to other connected clients: %s %s\n", username, pubKeyStr);
+          for (int i = 0; i < clientCount; i++) {
+            // todo: check authentication before sending this, filter out those not authenticated
+            clients[i].send("COMMAND NEW_USER " + username + " " + pubKeyStr);
+          }
+
         } else {
           clients[findClient(ID)].send("RESPONSE AUTH 401");
         }

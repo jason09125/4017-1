@@ -1,6 +1,7 @@
 package client.chat;
 
 import client.auth.ClientAuthenticator;
+import client.auth.PublicKeysStorage;
 import shared.AsymmetricCrypto;
 import shared.DataConverter;
 
@@ -18,11 +19,13 @@ public class ChatClient implements Runnable {
   private DataOutputStream streamOut = null;
   private ChatClientThread client = null;
   private ClientAuthenticator clientAuthenticator;
+  private PublicKeysStorage publicKeysStorage;
   private String challengeForServer;
   private String challengeFromServer;
 
   public ChatClient(String serverName, int serverPort) {
     this.clientAuthenticator = new ClientAuthenticator("./client-config/config.properties");
+    this.publicKeysStorage = new PublicKeysStorage();
 
     System.out.println("Establishing connection. Please wait ...");
     try {
@@ -72,6 +75,12 @@ public class ChatClient implements Runnable {
       if (action.equals("CHALLENGE")) {
         System.out.println("Challenge from server received, will provide digital signature when login");
         this.challengeFromServer = items[2];
+      }
+      if (action.equals("NEW_USER")) {
+        String username = items[2];
+        String publicKey = items[3];
+        System.out.printf("New user (%s) joined, public key: %s\n", username, publicKey);
+        publicKeysStorage.setUserPublicKeyMap(username, DataConverter.base64ToBytes(publicKey));
       }
       return;
     }
