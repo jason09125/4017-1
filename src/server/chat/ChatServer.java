@@ -84,7 +84,8 @@ public class ChatServer implements Runnable {
         String challenge = clientChallengeMap.get(ID);
         boolean authenticated = UserManager.auth(username, password, token, challenge, signature);
         if (authenticated) {
-          byte[] key = UserManager.generateSessionKey(username);
+          UserManager.generateSessionKey(username);
+          byte[] key = UserManager.getSessionKey(username, true);
           String keyStr = DataConverter.bytesToBase64(key);
           clients[findClient(ID)].send("RESPONSE AUTH 200 " + keyStr);
         } else {

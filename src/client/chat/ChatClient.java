@@ -83,7 +83,8 @@ public class ChatClient implements Runnable {
         if (result.equals("200")) {
           System.out.println(">> [Server]: Authenticated");
           String sessionKey = items[3];
-          clientAuthenticator.setSessionKey(DataConverter.base64ToBytes(sessionKey));
+          byte[] encryptedWithSelfPublicKey = DataConverter.base64ToBytes(sessionKey);
+          clientAuthenticator.setSessionKey(encryptedWithSelfPublicKey, true);
         } else {
           System.out.println(">> [Server]: Authentication failed - " + result);
         }

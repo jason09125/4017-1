@@ -60,8 +60,13 @@ public class ClientAuthenticator {
     return "COMMAND LOGIN " + username + " " + plainPassword + " " + token + " " + signatureStr;
   }
 
-  public void setSessionKey(byte[] key) {
-    this.sessionKey = key;
+  public void setSessionKey(byte[] key, boolean shouldDecrypt) {
+    if (!shouldDecrypt) {
+      this.sessionKey = key;
+      return;
+    }
+
+    this.sessionKey = AsymmetricCrypto.decryptWithPrivateKey(key, this.selfPrivateKey);
   }
 
   private boolean isEmptyString(String str) {

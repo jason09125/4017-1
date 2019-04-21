@@ -47,10 +47,9 @@ public class UserManager {
     return tfaSecret;
   }
 
-  public static byte[] generateSessionKey(String username) {
+  public static void generateSessionKey(String username) {
     byte[] key = SymmetricCrypto.generateSecretKey();
     userSessionKeyMap.put(username, key);
-    return key;
   }
 
   public static byte[] getSessionKey(String username, boolean shouldEncrypt) {
