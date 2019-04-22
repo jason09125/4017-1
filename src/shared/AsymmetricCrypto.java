@@ -47,6 +47,7 @@ public class AsymmetricCrypto {
     return false;
   }
 
+  // only for short data, e.g. session key, NOT for message itself
   public static byte[] decryptWithPublicKey(byte[] encrypted, byte[] pubKey) {
     try {
       PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pubKey));
@@ -59,6 +60,7 @@ public class AsymmetricCrypto {
     return null;
   }
 
+  // only for short data, e.g. session key, NOT for message itself
   public static byte[] encryptWithPrivateKey(byte[] plain, byte[] privKey) {
     try {
       PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privKey));
@@ -69,9 +71,9 @@ public class AsymmetricCrypto {
       e.printStackTrace();
     }
     return null;
-
   }
 
+  // only for short data, e.g. session key, NOT for message itself
   public static byte[] decryptWithPrivateKey(byte[] encrypted, byte[] privKey) {
     try {
       PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privKey));
@@ -82,9 +84,9 @@ public class AsymmetricCrypto {
       e.printStackTrace();
     }
     return null;
-
   }
 
+  // only for short data, e.g. session key, NOT for message itself
   public static byte[] encryptWithPublicKey(byte[] plain, byte[] pubKey) {
     try {
       PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pubKey));
@@ -95,6 +97,5 @@ public class AsymmetricCrypto {
       e.printStackTrace();
     }
     return null;
-
   }
 }

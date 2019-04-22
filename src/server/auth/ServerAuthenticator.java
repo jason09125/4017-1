@@ -41,6 +41,11 @@ public class ServerAuthenticator {
     return null;
   }
 
+  public static byte[] signMessage(byte[] msg) {
+    String privateKeyStr = readProp("SERVER_MASTER_PRIVATE_KEY");
+    return AsymmetricCrypto.signData(msg, DataConverter.base64ToBytes(privateKeyStr));
+  }
+
   public static byte[] encryptWithPrivateKey(byte[] data) {
     String privateKeyStr = readProp("SERVER_MASTER_PRIVATE_KEY");
     return AsymmetricCrypto.encryptWithPrivateKey(data, DataConverter.base64ToBytes(privateKeyStr));
