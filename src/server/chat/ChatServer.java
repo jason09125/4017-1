@@ -111,7 +111,16 @@ public class ChatServer implements Runnable {
           UserManager.generateSessionKey(username);
           byte[] key = UserManager.getSessionKey(username, true);
           String sessionKeyStr = DataConverter.bytesToBase64(key);
-          clients[findClient(ID)].send(String.format("RESPONSE AUTH 200 %s %s", username, sessionKeyStr));
+
+          StringBuilder onlineUsersSb = new StringBuilder();
+          for (int i = 0; i < clientCount; i++) {
+            String onlineUsername = authenticatedClientUsernameMap.get(clients[i].getID());
+            if (onlineUsername != null && onlineUsername.length() > 0) {
+              onlineUsersSb.append(onlineUsername);
+              onlineUsersSb.append("===");
+            }
+          }
+          clients[findClient(ID)].send(String.format("RESPONSE AUTH 200 %s %s %s", username, sessionKeyStr, onlineUsersSb.toString()));
           authenticatedClientUsernameMap.put(ID, username);
 
           // broadcast client's public key
@@ -148,10 +157,27 @@ public class ChatServer implements Runnable {
           clients[i].send("COMMAND DELIVER_MESSAGE " + senderUsername + " " + deliverableMessage);
         }
       }
+
       if (action.equals("QUIT")) {
         clients[findClient(ID)].send("RESPONSE QUIT");
         remove(ID);
       }
+
+      if (action.equals("PUB_KEY_REQUEST")) {
+        if (items.length != 3) return;
+
+        String[] usernames = items[2].split("===");
+        for (String username : usernames) {
+          if (username != null && username.length() > 0) {
+            byte[] bytes = UserManager.getPublicKey(username);
+            if (bytes != null && bytes.length > 0) {
+              String publicKey = DataConverter.bytesToBase64(bytes);
+              clients[findClient(ID)].send(String.format("RESPONSE PUB_KEY %s %s", username, publicKey));
+            }
+          }
+        }
+      }
+
       return;
     }
 

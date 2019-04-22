@@ -35,6 +35,8 @@ public class AsymmetricCrypto {
   }
 
   public static boolean verifyData(byte[] data, byte[] digitalSignature, byte[] pubKey) {
+    if (pubKey == null) return false;
+
     try {
       PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pubKey));
       Signature signature = Signature.getInstance("SHA256WithRSA");

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 public class ChatClient implements Runnable {
   private Socket socket = null;
@@ -152,10 +153,28 @@ public class ChatClient implements Runnable {
         if (items.length < 3) return;
         String statusCode = items[2];
         if (statusCode.equals("200")) {
-          if (items.length != 5) return;
+          if (items.length < 5) return;
+
           System.out.println(">> [Server]: Authenticated");
           String username = items[3];
           String sessionKey = items[4];
+          if (items.length >= 6) {
+            String[] onlineUsers = items[5].split("===");
+            if (onlineUsers.length > 0) {
+              Object[] strObjs = Arrays.stream(onlineUsers).filter(n -> n != null && n.length() > 0 && !n.equals(username) && publicKeysStorage.getUserPublicKey(n) == null).toArray();
+              String[] usersToRequest = Arrays.copyOf(strObjs, strObjs.length, String[].class);
+              if (usersToRequest.length > 0) {
+                String cmdForGettingPublicKey = String.format("COMMAND PUB_KEY_REQUEST %s", String.join("===", usersToRequest));
+                try {
+                  streamOut.writeUTF(cmdForGettingPublicKey);
+                  streamOut.flush();
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
+              }
+            }
+          }
+
           this.username = username;
           byte[] encryptedWithSelfPublicKey = DataConverter.base64ToBytes(sessionKey);
           clientAuthenticator.setSessionKey(encryptedWithSelfPublicKey, true);
@@ -178,6 +197,7 @@ public class ChatClient implements Runnable {
           }
         }
       }
+
       if (action.equals("SEND_MESSAGE")) {
         if (items.length < 3) return;
         String statusCode = items[2];
@@ -187,6 +207,14 @@ public class ChatClient implements Runnable {
           }
         }
       }
+
+      if (action.equals("PUB_KEY")) {
+        if (items.length != 4) return;
+        String name = items[2];
+        String key = items[3];
+        publicKeysStorage.setUserPublicKeyMap(name, DataConverter.base64ToBytes(key));
+      }
+
       if (action.equals("QUIT")) {
         this.hasAuthenticated = false;
         System.out.println("Good bye. Press RETURN to exit ...");
