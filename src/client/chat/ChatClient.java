@@ -26,8 +26,8 @@ public class ChatClient implements Runnable {
   private String challengeFromServer;
   private String username;
 
-  public ChatClient(String serverName, int serverPort) {
-    this.clientAuthenticator = new ClientAuthenticator("./client-config/config.properties");
+  public ChatClient(String serverName, int serverPort, String configFile) {
+    this.clientAuthenticator = new ClientAuthenticator(configFile);
     this.publicKeysStorage = new PublicKeysStorage();
     this.messageHandler = new MessageHandler(this.clientAuthenticator, this.publicKeysStorage);
 
@@ -186,9 +186,10 @@ public class ChatClient implements Runnable {
 
   public static void main(String args[]) {
     ChatClient client = null;
-    if (args.length != 2)
-      System.out.println("Usage: java ChatClient host port");
-    else
-      client = new ChatClient(args[0], Integer.parseInt(args[1]));
+    if (args.length != 3) {
+      System.out.println("Usage: java ChatClient [host] [port] [config-file]");
+    } else {
+      client = new ChatClient(args[0], Integer.parseInt(args[1]), args[2]);
+    }
   }
 }
