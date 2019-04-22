@@ -25,6 +25,7 @@ public class ChatClient implements Runnable {
   private String challengeForServer;
   private String challengeFromServer;
   private String username;
+  private boolean hasAuthenticated;
 
   public ChatClient(String serverName, int serverPort, String configFile) {
     this.clientAuthenticator = new ClientAuthenticator(configFile);
@@ -52,7 +53,7 @@ public class ChatClient implements Runnable {
 
           // check human command
           if (line.matches("^\\.login .*$")) { // ---- send authentication request ----
-            System.out.println("Logging in");
+            System.out.println("Logging in...");
             String[] items = line.split("\\s+");
             String username = items[1];
             String password = items[2];
@@ -63,10 +64,21 @@ public class ChatClient implements Runnable {
             continue;
           }
 
-          // send message
-          String cipherText = messageHandler.getDeliverable(line);
-          streamOut.writeUTF(String.format("COMMAND SEND_MESSAGE %s %s", this.username, cipherText));
-          streamOut.flush();
+          if (line.matches("^\\.bye$")) { // ---- send authentication request ----
+            System.out.println("Quiting...");
+            streamOut.writeUTF("COMMAND QUIT");
+            streamOut.flush();
+            continue;
+          }
+
+          if (this.hasAuthenticated) {
+            // send message
+            String cipherText = messageHandler.getDeliverable(line);
+            streamOut.writeUTF(String.format("COMMAND SEND_MESSAGE %s %s", this.username, cipherText));
+            streamOut.flush();
+          } else if (line.length() > 0) {
+            System.out.println("Unauthorized, use '.login [username] [password] [token]' to login first");
+          }
         } catch (IOException ioe) {
           System.out.println("Sending error: " + ioe.getMessage());
           stop();
@@ -101,19 +113,18 @@ public class ChatClient implements Runnable {
           System.out.printf("[Verification Failed] Message from %s is not trusted\n", senderUsername);
           return;
         }
-        System.out.printf("[Verified] %s %s\n", senderUsername, plainText);
+        System.out.printf("[%s]: %s\n", senderUsername, plainText);
       }
 
-      if (action.equals("SERVER_MSG")) {
-        if (items.length >= 3) {
-          String serverMsgCode = items[2];
-          String messageContent = "";
-          if ("MULTIPLE_LOGIN_BLOCKED".equals(serverMsgCode)) {
-            messageContent = "Server noticed and blocked a login attempt of your account from another client portal";
-          }
-          System.out.println(">> [Server]: " + serverMsgCode + " " + messageContent);
-        }
-        return;
+      return;
+    }
+
+    // check server message
+    if (msg.matches("^SERVER_MSG===.*$")) {
+      String[] items = msg.split("===");
+      if (items.length >= 2) {
+        String serverMessage = items[1];
+        System.out.println(">> [Server message]: " + serverMessage);
       }
       return;
     }
@@ -131,6 +142,7 @@ public class ChatClient implements Runnable {
           this.username = username;
           byte[] encryptedWithSelfPublicKey = DataConverter.base64ToBytes(sessionKey);
           clientAuthenticator.setSessionKey(encryptedWithSelfPublicKey, true);
+          this.hasAuthenticated = true;
         } else {
           String statusMessage = items.length >= 4 ? items[3] : "";
           System.out.println(">> [Server]: Authentication failed - " + statusCode + " " + statusMessage);
@@ -154,14 +166,11 @@ public class ChatClient implements Runnable {
           System.out.println("Failed to send message, server responds " + result + " " + items[3]);
         }
       }
-      return;
-    }
-
-    if (msg.equals(".bye")) {
-      System.out.println("Good bye. Press RETURN to exit ...");
-      stop();
-    } else {
-      System.out.println(msg);
+      if (action.equals("QUIT")) {
+        this.hasAuthenticated = false;
+        System.out.println("Good bye. Press RETURN to exit ...");
+        stop();
+      }
     }
   }
 

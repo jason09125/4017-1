@@ -99,7 +99,7 @@ public class ChatServer implements Runnable {
           String name = authenticatedClientUsernameMap.get(clientId);
           if (username.equals(name)) {
             clients[findClient(ID)].send("RESPONSE AUTH 409 Already_logged_in");
-            clients[findClient(clientId)].send("COMMAND SERVER_MSG MULTIPLE_LOGIN_BLOCKED");
+            clients[findClient(clientId)].send("SERVER_MSG===Server noticed and blocked a login attempt of your account from another client portal");
             return;
           }
         }
@@ -147,17 +147,15 @@ public class ChatServer implements Runnable {
           clients[i].send("COMMAND DELIVER_MESSAGE " + senderUsername + " " + deliverableMessage);
         }
       }
+      if (action.equals("QUIT")) {
+        clients[findClient(ID)].send("RESPONSE QUIT");
+        remove(ID);
+      }
       return;
     }
 
-    if (input.equals(".bye")) {
-      clients[findClient(ID)].send(".bye");
-      remove(ID);
-    } else {
-//      for (int i = 0; i < clientCount; i++) {
-//        clients[i].send(ID + ": " + input); //
-//      }
-    }
+
+    clients[findClient(ID)].send("RESPONSE LOGOUT 200");
   }
 
   synchronized void remove(int ID) {
