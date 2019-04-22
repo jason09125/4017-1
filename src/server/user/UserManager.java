@@ -42,6 +42,9 @@ public class UserManager {
       System.out.println("> Failed to register: username cannot be empty");
       return null;
     }
+    if (username.contains(" ") || username.contains("=")) {
+      System.out.println("> Failed to register: username cannot contain empty space or special characters");
+    }
     if (DatabaseMock.isExisting(username)) {
       System.out.println("> Failed to register: username already exists");
       return null;
