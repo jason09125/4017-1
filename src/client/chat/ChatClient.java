@@ -97,7 +97,11 @@ public class ChatClient implements Runnable {
         String senderUsername = items[2];
         String encryptedWithSessionKey = items[3];
         String plainText = messageHandler.parseIncoming(senderUsername, encryptedWithSessionKey);
-        System.out.println(plainText);
+        if (plainText == null) {
+          System.out.printf("[Verification Failed] Message from %s is not trusted\n", senderUsername);
+          return;
+        }
+        System.out.printf("[Verified] %s %s\n", senderUsername, plainText);
       }
       return;
     }
