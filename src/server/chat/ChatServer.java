@@ -187,7 +187,7 @@ public class ChatServer implements Runnable {
       System.out.println("Client accepted: " + socket);
       clients[clientCount] = new ChatServerThread(this, socket);
       try {
-        socket.setSoTimeout(30000);
+        socket.setSoTimeout(300000); // 5 minutes
       } catch (SocketException e) {
         int clientIdToRemove = clients[clientCount].getID();
         remove(clientIdToRemove);
