@@ -38,6 +38,22 @@ public class UserManager {
   }
 
   public static String register(String username, String plainPassword, String publicKey) {
+    if (username == null || username.equals("")) {
+      System.out.println("> Failed to register: username cannot be empty");
+      return null;
+    }
+    if (DatabaseMock.isExisting(username)) {
+      System.out.println("> Failed to register: username already exists");
+      return null;
+    }
+    if (plainPassword == null || plainPassword.length() < 6) {
+      System.out.println("> Failed to register: password should have at least 6 characters");
+      return null;
+    }
+    if (publicKey == null || publicKey.length() != 216) {
+      System.out.println("> Failed to register: public key is not a valid base64 string");
+      return null;
+    }
     String hash = BCrypt.withDefaults().hashToString(12, plainPassword.toCharArray());
     GoogleAuthenticator gAuth = new GoogleAuthenticator();
     String tfaSecret = gAuth.createCredentials().getKey();
@@ -68,5 +84,21 @@ public class UserManager {
   public static byte[] getPublicKey(String username) {
     User user = DatabaseMock.getUser(username);
     return DataConverter.base64ToBytes(user.getPublicKey());
+  }
+
+  public static void main(String[] args) {
+    if (args.length != 3) {
+      System.out.println("Usage: java UserManager username password public-key");
+    } else {
+      String username = args[0];
+      String password = args[1];
+      String publicKey = args[2];
+      String tfaSecret = UserManager.register(username, password, publicKey);
+      if (tfaSecret != null) {
+        System.out.printf("> User Manager on server: New user registered: %s\n", username);
+        System.out.println("> User Manager on server: Please store this in app like Google Authenticator");
+        System.out.printf("------ 2FA Secret Key ------\n%s\n\n", tfaSecret);
+      }
+    }
   }
 }

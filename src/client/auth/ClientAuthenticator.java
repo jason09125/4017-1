@@ -6,9 +6,6 @@ import shared.DataConverter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.Properties;
 
 public class ClientAuthenticator {
@@ -31,14 +28,6 @@ public class ClientAuthenticator {
 
   public byte[] getSessionKey() {
     return sessionKey;
-  }
-
-  public static void generateKeyPair() { // helper function for new users
-    KeyPair keyPair = AsymmetricCrypto.generateKeyPair();
-    PublicKey pubKey = keyPair.getPublic();
-    PrivateKey privKey = keyPair.getPrivate();
-    System.out.printf("------------ Public Key --------------\n%s\n\n", DataConverter.keyToBase64(pubKey));
-    System.out.printf("------------ Private Key -------------\n%s\n\n", DataConverter.keyToBase64(privKey));
   }
 
   public ClientAuthenticator(String configPath) { // sample path: "./client-config/config.properties"
@@ -65,9 +54,5 @@ public class ClientAuthenticator {
     }
 
     this.sessionKey = AsymmetricCrypto.decryptWithPrivateKey(key, this.selfPrivateKey);
-  }
-
-  private boolean isEmptyString(String str) {
-    return str == null || str.length() == 0;
   }
 }

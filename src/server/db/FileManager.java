@@ -10,23 +10,17 @@ class FileManager {
   static private String FILE_PATH = Paths.get(".", "db").toString();
   static private HashMap<String, User> userMap = new HashMap<>();
 
-  static User getByKey(String username) {
+  static User getByKey(String username) throws IOException, ClassNotFoundException {
     User user = userMap.get(username);
     if (user != null) return userMap.get(username);
-
-    try {
-      String path = Paths.get(FILE_PATH, username).toString();
-      FileInputStream fileIn = new FileInputStream(path);
-      ObjectInputStream objectIn = new ObjectInputStream(fileIn);
-      user = (User) objectIn.readObject();
-      userMap.put(username, user);
-      fileIn.close();
-      objectIn.close();
-      return user;
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return null;
+    String path = Paths.get(FILE_PATH, username).toString();
+    FileInputStream fileIn = new FileInputStream(path);
+    ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+    user = (User) objectIn.readObject();
+    userMap.put(username, user);
+    fileIn.close();
+    objectIn.close();
+    return user;
   }
 
   static void addUser(User user) {
