@@ -8,6 +8,7 @@ import shared.DataConverter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -185,6 +186,12 @@ public class ChatServer implements Runnable {
     if (clientCount < clients.length) {
       System.out.println("Client accepted: " + socket);
       clients[clientCount] = new ChatServerThread(this, socket);
+      try {
+        socket.setSoTimeout(30000);
+      } catch (SocketException e) {
+        int clientIdToRemove = clients[clientCount].getID();
+        remove(clientIdToRemove);
+      }
       try {
         clients[clientCount].open();
         clients[clientCount].start();

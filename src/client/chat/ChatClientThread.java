@@ -1,7 +1,8 @@
 package client.chat;
 
-import java.io.*;
-import java.net.*;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.Socket;
 
 public class ChatClientThread extends Thread {
   private Socket socket = null;
@@ -40,6 +41,7 @@ public class ChatClientThread extends Thread {
         client.handle(streamIn.readUTF());
       } catch (IOException ioe) {
         System.out.println("Listening error: " + ioe.getMessage());
+        System.out.println(">> You might be seeing this message because:\n\t1) Server is down at the moment; or\n\t2) You have been inactive for a while and server disconnects you");
         client.stop();
       }
     }
