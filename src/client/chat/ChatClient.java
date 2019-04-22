@@ -103,6 +103,18 @@ public class ChatClient implements Runnable {
         }
         System.out.printf("[Verified] %s %s\n", senderUsername, plainText);
       }
+
+      if (action.equals("SERVER_MSG")) {
+        if (items.length >= 3) {
+          String serverMsgCode = items[2];
+          String messageContent = "";
+          if ("MULTIPLE_LOGIN_BLOCKED".equals(serverMsgCode)) {
+            messageContent = "Server noticed and blocked a login attempt of your account from another client portal";
+          }
+          System.out.println(">> [Server]: " + serverMsgCode + " " + messageContent);
+        }
+        return;
+      }
       return;
     }
 
@@ -111,8 +123,8 @@ public class ChatClient implements Runnable {
       String[] items = msg.split("\\s+");
       String action = items[1];
       if (action.equals("AUTH")) {
-        String result = items[2];
-        if (result.equals("200")) {
+        String statusCode = items[2];
+        if (statusCode.equals("200")) {
           System.out.println(">> [Server]: Authenticated");
           String username = items[3];
           String sessionKey = items[4];
@@ -120,7 +132,8 @@ public class ChatClient implements Runnable {
           byte[] encryptedWithSelfPublicKey = DataConverter.base64ToBytes(sessionKey);
           clientAuthenticator.setSessionKey(encryptedWithSelfPublicKey, true);
         } else {
-          System.out.println(">> [Server]: Authentication failed - " + result);
+          String statusMessage = items.length >= 4 ? items[3] : "";
+          System.out.println(">> [Server]: Authentication failed - " + statusCode + " " + statusMessage);
         }
       }
       if (action.equals("SERVER_SIGNATURE")) {

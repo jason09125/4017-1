@@ -82,10 +82,29 @@ public class ChatServer implements Runnable {
       }
 
       if (action.equals("LOGIN")) {
+        if (items.length != 6) {
+          clients[findClient(ID)].send("RESPONSE AUTH 400 Invalid_argument_number");
+          return;
+        }
         String username = items[2];
         String password = items[3];
         int token = Integer.parseInt(items[4]);
         byte[] signature = DataConverter.base64ToBytes(items[5]);
+
+        // check if it has already logged in
+        Object[] clientIds = clientUsernameMap.keySet().toArray();
+        for (Object obj : clientIds) {
+          int clientId = (int) obj;
+          String name = clientUsernameMap.get(clientId);
+          if (username.equals(name)) {
+            if (clientAuthMap.get(clientId)) {
+              clients[findClient(ID)].send("RESPONSE AUTH 409 Already_logged_in");
+              clients[findClient(clientId)].send("COMMAND SERVER_MSG MULTIPLE_LOGIN_BLOCKED");
+              return;
+            }
+          }
+        }
+
         String challenge = clientChallengeMap.get(ID);
         boolean authenticated = UserManager.auth(username, password, token, challenge, signature);
         if (authenticated) {
@@ -108,7 +127,7 @@ public class ChatServer implements Runnable {
           }
 
         } else {
-          clients[findClient(ID)].send("RESPONSE AUTH 401");
+          clients[findClient(ID)].send("RESPONSE AUTH 403 Invalid_credentials");
         }
       }
 
