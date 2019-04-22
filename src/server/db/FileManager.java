@@ -3,10 +3,11 @@ package server.db;
 import server.user.User;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 class FileManager {
-  static private String FILE_PATH = "./db";
+  static private String FILE_PATH = Paths.get(".", "db").toString();
   static private HashMap<String, User> userMap = new HashMap<>();
 
   static User getByKey(String username) {
@@ -14,7 +15,8 @@ class FileManager {
     if (user != null) return userMap.get(username);
 
     try {
-      FileInputStream fileIn = new FileInputStream(FILE_PATH + '/' + username);
+      String path = Paths.get(FILE_PATH, username).toString();
+      FileInputStream fileIn = new FileInputStream(path);
       ObjectInputStream objectIn = new ObjectInputStream(fileIn);
       user = (User) objectIn.readObject();
       userMap.put(username, user);
@@ -29,7 +31,8 @@ class FileManager {
 
   static void addUser(User user) {
     try {
-      FileOutputStream fileOut = new FileOutputStream(FILE_PATH + '/' + user.getUsername(), true);
+      String path = Paths.get(FILE_PATH, user.getUsername()).toString();
+      FileOutputStream fileOut = new FileOutputStream(path, false);
       ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
       objectOut.writeObject(user);
       fileOut.close();
@@ -41,7 +44,8 @@ class FileManager {
   }
 
   static boolean deleteUser(String username) {
-    File file = new File(FILE_PATH + '/' + username);
+    String path = Paths.get(FILE_PATH, username).toString();
+    File file = new File(path);
 
     return file.delete();
   }
