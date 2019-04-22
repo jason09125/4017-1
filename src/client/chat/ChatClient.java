@@ -2,6 +2,7 @@ package client.chat;
 
 import client.auth.ClientAuthenticator;
 import client.auth.PublicKeysStorage;
+import client.message.MessageHandler;
 import shared.AsymmetricCrypto;
 import shared.DataConverter;
 
@@ -20,12 +21,15 @@ public class ChatClient implements Runnable {
   private ChatClientThread client = null;
   private ClientAuthenticator clientAuthenticator;
   private PublicKeysStorage publicKeysStorage;
+  private MessageHandler messageHandler;
   private String challengeForServer;
   private String challengeFromServer;
+  private String username;
 
   public ChatClient(String serverName, int serverPort) {
     this.clientAuthenticator = new ClientAuthenticator("./client-config/config.properties");
     this.publicKeysStorage = new PublicKeysStorage();
+    this.messageHandler = new MessageHandler(this.clientAuthenticator, this.publicKeysStorage);
 
     System.out.println("Establishing connection. Please wait ...");
     try {
@@ -46,6 +50,7 @@ public class ChatClient implements Runnable {
         try {
           String line = console.readLine();
 
+          // check human command
           if (line.matches("^\\.login .*$")) { // ---- send authentication request ----
             System.out.println("Logging in");
             String[] items = line.split("\\s+");
@@ -58,7 +63,9 @@ public class ChatClient implements Runnable {
             continue;
           }
 
-          streamOut.writeUTF(line);
+          // send message
+          String cipherText = messageHandler.getDeliverable(line);
+          streamOut.writeUTF(String.format("COMMAND SEND_MESSAGE %s %s", this.username, cipherText));
           streamOut.flush();
         } catch (IOException ioe) {
           System.out.println("Sending error: " + ioe.getMessage());
@@ -69,6 +76,8 @@ public class ChatClient implements Runnable {
 
   void handle(String msg) {
     System.out.println("Handling: " + msg);
+
+    // check machine command
     if (msg.matches("^COMMAND .*$")) {
       String[] items = msg.split("\\s+");
       String action = items[1];
@@ -76,14 +85,24 @@ public class ChatClient implements Runnable {
         System.out.println("Challenge from server received, will provide digital signature when login");
         this.challengeFromServer = items[2];
       }
+
       if (action.equals("NEW_USER")) {
         String username = items[2];
         String publicKey = items[3];
         System.out.printf("New user (%s) joined, public key: %s\n", username, publicKey);
         publicKeysStorage.setUserPublicKeyMap(username, DataConverter.base64ToBytes(publicKey));
       }
+
+      if (action.equals("DELIVER_MESSAGE")) {
+        String senderUsername = items[2];
+        String encryptedWithSessionKey = items[3];
+        String plainText = messageHandler.parseIncoming(senderUsername, encryptedWithSessionKey);
+        System.out.println(plainText);
+      }
       return;
     }
+
+    // check machine response
     if (msg.matches("^RESPONSE .*$")) {
       String[] items = msg.split("\\s+");
       String action = items[1];
@@ -91,7 +110,9 @@ public class ChatClient implements Runnable {
         String result = items[2];
         if (result.equals("200")) {
           System.out.println(">> [Server]: Authenticated");
-          String sessionKey = items[3];
+          String username = items[3];
+          String sessionKey = items[4];
+          this.username = username;
           byte[] encryptedWithSelfPublicKey = DataConverter.base64ToBytes(sessionKey);
           clientAuthenticator.setSessionKey(encryptedWithSelfPublicKey, true);
         } else {
@@ -108,6 +129,12 @@ public class ChatClient implements Runnable {
           } else {
             System.out.println("[WARNING] Server has INVALID digital signature, this server could be forged");
           }
+        }
+      }
+      if (action.equals("SEND_MESSAGE")) {
+        String result = items[2];
+        if (!result.equals("200")) {
+          System.out.println("Failed to send message, server responds " + result + " " + items[3]);
         }
       }
       return;

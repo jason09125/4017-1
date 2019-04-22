@@ -1,6 +1,7 @@
 package server.chat;
 
 import server.auth.ServerAuthenticator;
+import server.message.MessageHandler;
 import server.user.UserManager;
 import shared.DataConverter;
 
@@ -65,6 +66,7 @@ public class ChatServer implements Runnable {
   synchronized void handle(int ID, String input) {
     System.out.printf(">>> Handling %s: %s\n", ID, input);
 
+    // check machine command
     if (input.matches("^COMMAND .*$")) {
       String items[] = input.split(" ");
       if (items.length < 2) {
@@ -78,6 +80,7 @@ public class ChatServer implements Runnable {
         System.out.println("Digital signature generated: " + signatureStr);
         clients[findClient(ID)].send("RESPONSE SERVER_SIGNATURE 200 " + signatureStr);
       }
+
       if (action.equals("LOGIN")) {
         String username = items[2];
         String password = items[3];
@@ -89,7 +92,7 @@ public class ChatServer implements Runnable {
           UserManager.generateSessionKey(username);
           byte[] key = UserManager.getSessionKey(username, true);
           String sessionKeyStr = DataConverter.bytesToBase64(key);
-          clients[findClient(ID)].send("RESPONSE AUTH 200 " + sessionKeyStr);
+          clients[findClient(ID)].send(String.format("RESPONSE AUTH 200 %s %s", username, sessionKeyStr));
           clientUsernameMap.put(ID, username);
           clientAuthMap.put(ID, true);
 
@@ -99,17 +102,32 @@ public class ChatServer implements Runnable {
           for (int i = 0; i < clientCount; i++) {
             // check authentication before sending this, filter out those not authenticated
             if (!clientAuthMap.get(clients[i].getID())) {
-              return;
-            }
-            // do not send to the new client itself
-            if (clients[i].getID() == ID) {
-              return;
+              continue;
             }
             clients[i].send("COMMAND NEW_USER " + username + " " + pubKeyStr);
           }
 
         } else {
           clients[findClient(ID)].send("RESPONSE AUTH 401");
+        }
+      }
+
+      if (action.equals("SEND_MESSAGE")) {
+        String senderUsername = items[2];
+        if (!senderUsername.equals(clientUsernameMap.get(ID)) || !clientAuthMap.get(ID)) {
+          clients[findClient(ID)].send("RESPONSE SEND_MESSAGE 401 Unauthorized");
+          return;
+        }
+        String cipherText = items[3];
+        byte[] signedByServer = MessageHandler.parseFromClientAndSign(senderUsername, UserManager.getPublicKey(senderUsername), cipherText);
+        for (int i = 0; i < clientCount; i++) {
+          // filter out those not authenticated
+          if (!clientAuthMap.get(clients[i].getID())) {
+            continue;
+          }
+          String deliverableMessage = MessageHandler.getDeliverable(clientUsernameMap.get(clients[i].getID()), signedByServer);
+
+          clients[i].send("COMMAND DELIVER_MESSAGE " + senderUsername + " " + deliverableMessage);
         }
       }
       return;
