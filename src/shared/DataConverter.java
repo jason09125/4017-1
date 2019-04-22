@@ -20,6 +20,9 @@ public class DataConverter {
   }
 
   public static byte[] combineByteArrays(byte[] one, byte[] two) {
+    if (one == null) return two;
+    if (two == null) return one;
+
     byte[] combined = new byte[one.length + two.length];
 
     for (int i = 0; i < combined.length; ++i) {
@@ -34,5 +37,13 @@ public class DataConverter {
 
   public static byte[] getSignatureFromSigned(byte[] combined) {
     return Arrays.copyOfRange(combined, combined.length - 128, combined.length);
+  }
+
+  public static byte[] getDataFromBytesWithChecksum(byte[] combined) {
+    return Arrays.copyOfRange(combined, 0, combined.length - 32);
+  }
+
+  public static byte[] getChecksumFromBytes(byte[] combined) {
+    return Arrays.copyOfRange(combined, combined.length - 32, combined.length);
   }
 }

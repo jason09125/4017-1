@@ -4,6 +4,7 @@ import client.auth.ClientAuthenticator;
 import client.auth.PublicKeysStorage;
 import shared.AsymmetricCrypto;
 import shared.DataConverter;
+import shared.Md5Helper;
 import shared.SymmetricCrypto;
 
 public class MessageHandler {
@@ -21,11 +22,23 @@ public class MessageHandler {
     byte[] combined = DataConverter.combineByteArrays(plainTextBytes, signature);
 
     byte[] sessionKeyEncrypted = SymmetricCrypto.encrypt(combined, clientAuthenticator.getSessionKey());
-    return DataConverter.bytesToBase64(sessionKeyEncrypted);
+
+    String md5 = Md5Helper.digest(sessionKeyEncrypted);
+    byte[] withMd5 = DataConverter.combineByteArrays(sessionKeyEncrypted, md5.getBytes());
+    return DataConverter.bytesToBase64(withMd5);
   }
 
   public String parseIncoming(String senderUsername, String cipherText) {
-    byte[] encryptedWithSessionKey = DataConverter.base64ToBytes(cipherText);
+    byte[] withChecksum = DataConverter.base64ToBytes(cipherText);
+    String md5 = new String(DataConverter.getChecksumFromBytes(withChecksum));
+    byte[] encryptedWithSessionKey = DataConverter.getDataFromBytesWithChecksum(withChecksum);
+
+    boolean isChecksumVerified = Md5Helper.verify(encryptedWithSessionKey, md5);
+    System.out.println(">>> Checksum OK: " + isChecksumVerified);
+    if (!isChecksumVerified) {
+      return null; // todo: return warning
+    }
+
     byte[] serverSigned = SymmetricCrypto.decrypt(encryptedWithSessionKey, clientAuthenticator.getSessionKey());
 
     byte[] dataWithoutServerSignature = DataConverter.getDataFromSigned(serverSigned);
