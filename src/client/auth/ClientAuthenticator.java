@@ -53,11 +53,9 @@ public class ClientAuthenticator {
     }
   }
 
-  public String getLoginCommand(String username, String plainPassword, int token, String challenge) {
+  public String signChallenge(String challenge) {
     byte[] signature = AsymmetricCrypto.signData(challenge.getBytes(), this.selfPrivateKey);
-    String signatureStr = DataConverter.bytesToBase64(signature);
-
-    return "COMMAND LOGIN " + username + " " + plainPassword + " " + token + " " + signatureStr;
+    return DataConverter.bytesToBase64(signature);
   }
 
   public void setSessionKey(byte[] key, boolean shouldDecrypt) {

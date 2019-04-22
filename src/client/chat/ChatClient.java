@@ -51,14 +51,23 @@ public class ChatClient implements Runnable {
         try {
           String line = console.readLine();
 
+          if (line == null || line.equals("")) {
+            continue;
+          }
+
           // check human command
           if (line.matches("^\\.login .*$")) { // ---- send authentication request ----
             System.out.println("Logging in...");
             String[] items = line.split("\\s+");
+            if (items.length != 4) {
+              System.out.println("Invalid parameter number, usage: '.login [username] [password] [token]'");
+              continue;
+            }
             String username = items[1];
             String password = items[2];
             int token = Integer.parseInt(items[3]);
-            String cmd = clientAuthenticator.getLoginCommand(username, password, token, this.challengeFromServer);
+            String signature = clientAuthenticator.signChallenge(this.challengeFromServer);
+            String cmd = String.format("COMMAND LOGIN %s %s %s %s", username, password, token, signature);
             streamOut.writeUTF(cmd);
             streamOut.flush();
             continue;
@@ -76,7 +85,7 @@ public class ChatClient implements Runnable {
             String cipherText = messageHandler.getDeliverable(line);
             streamOut.writeUTF(String.format("COMMAND SEND_MESSAGE %s %s", this.username, cipherText));
             streamOut.flush();
-          } else if (line.length() > 0) {
+          } else {
             System.out.println("Unauthorized, use '.login [username] [password] [token]' to login first");
           }
         } catch (IOException ioe) {
@@ -92,13 +101,16 @@ public class ChatClient implements Runnable {
     // check machine command
     if (msg.matches("^COMMAND .*$")) {
       String[] items = msg.split("\\s+");
+      if (items.length < 2) return;
       String action = items[1];
       if (action.equals("CHALLENGE")) {
+        if (items.length != 3) return;
         System.out.println("Challenge from server received, will provide digital signature when login");
         this.challengeFromServer = items[2];
       }
 
       if (action.equals("NEW_USER")) {
+        if (items.length != 4) return;
         String username = items[2];
         String publicKey = items[3];
         System.out.printf("New user (%s) joined, public key: %s\n", username, publicKey);
@@ -106,6 +118,7 @@ public class ChatClient implements Runnable {
       }
 
       if (action.equals("DELIVER_MESSAGE")) {
+        if (items.length != 4) return;
         String senderUsername = items[2];
         String encryptedWithSessionKey = items[3];
         String plainText = messageHandler.parseIncoming(senderUsername, encryptedWithSessionKey);
@@ -132,10 +145,14 @@ public class ChatClient implements Runnable {
     // check machine response
     if (msg.matches("^RESPONSE .*$")) {
       String[] items = msg.split("\\s+");
+      if (items.length < 2 || items[1] == null || items[1].equals("")) return;
+
       String action = items[1];
       if (action.equals("AUTH")) {
+        if (items.length < 3) return;
         String statusCode = items[2];
         if (statusCode.equals("200")) {
+          if (items.length != 5) return;
           System.out.println(">> [Server]: Authenticated");
           String username = items[3];
           String sessionKey = items[4];
@@ -149,6 +166,7 @@ public class ChatClient implements Runnable {
         }
       }
       if (action.equals("SERVER_SIGNATURE")) {
+        if (items.length != 3) return;
         String result = items[2];
         if (result.equals("200")) {
           byte[] signature = DataConverter.base64ToBytes(items[3]);
@@ -161,9 +179,12 @@ public class ChatClient implements Runnable {
         }
       }
       if (action.equals("SEND_MESSAGE")) {
-        String result = items[2];
-        if (!result.equals("200")) {
-          System.out.println("Failed to send message, server responds " + result + " " + items[3]);
+        if (items.length < 3) return;
+        String statusCode = items[2];
+        if (!statusCode.equals("200")) {
+          if (items.length >= 4) {
+            System.out.println("Failed to send message, server responds " + statusCode + " " + items[3]);
+          }
         }
       }
       if (action.equals("QUIT")) {
