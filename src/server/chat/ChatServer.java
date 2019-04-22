@@ -8,12 +8,13 @@ import shared.DataConverter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ChatServer implements Runnable {
   private ChatServerThread clients[] = new ChatServerThread[50];
-  private HashMap<Integer, String> clientUsernameMap = new HashMap<>();
-  private HashMap<Integer, Boolean> clientAuthMap = new HashMap<>();
+  private Map<Integer, String> authenticatedClientUsernameMap = Collections.synchronizedMap(new HashMap<Integer, String>());
   private HashMap<Integer, String> clientChallengeMap = new HashMap<>();
   private ServerSocket server = null;
   private volatile Thread thread = null;
@@ -92,16 +93,14 @@ public class ChatServer implements Runnable {
         byte[] signature = DataConverter.base64ToBytes(items[5]);
 
         // check if it has already logged in
-        Object[] clientIds = clientUsernameMap.keySet().toArray();
+        Object[] clientIds = authenticatedClientUsernameMap.keySet().toArray();
         for (Object obj : clientIds) {
           int clientId = (int) obj;
-          String name = clientUsernameMap.get(clientId);
+          String name = authenticatedClientUsernameMap.get(clientId);
           if (username.equals(name)) {
-            if (clientAuthMap.get(clientId)) {
-              clients[findClient(ID)].send("RESPONSE AUTH 409 Already_logged_in");
-              clients[findClient(clientId)].send("COMMAND SERVER_MSG MULTIPLE_LOGIN_BLOCKED");
-              return;
-            }
+            clients[findClient(ID)].send("RESPONSE AUTH 409 Already_logged_in");
+            clients[findClient(clientId)].send("COMMAND SERVER_MSG MULTIPLE_LOGIN_BLOCKED");
+            return;
           }
         }
 
@@ -112,15 +111,14 @@ public class ChatServer implements Runnable {
           byte[] key = UserManager.getSessionKey(username, true);
           String sessionKeyStr = DataConverter.bytesToBase64(key);
           clients[findClient(ID)].send(String.format("RESPONSE AUTH 200 %s %s", username, sessionKeyStr));
-          clientUsernameMap.put(ID, username);
-          clientAuthMap.put(ID, true);
+          authenticatedClientUsernameMap.put(ID, username);
 
           // broadcast client's public key
           String pubKeyStr = DataConverter.bytesToBase64(UserManager.getPublicKey(username));
           System.out.printf("Authenticated - Broadcasting user's public key to other connected clients: %s %s\n", username, pubKeyStr);
           for (int i = 0; i < clientCount; i++) {
             // check authentication before sending this, filter out those not authenticated
-            if (!clientAuthMap.get(clients[i].getID())) {
+            if (authenticatedClientUsernameMap.get(clients[i].getID()) == null) {
               continue;
             }
             clients[i].send("COMMAND NEW_USER " + username + " " + pubKeyStr);
@@ -133,7 +131,7 @@ public class ChatServer implements Runnable {
 
       if (action.equals("SEND_MESSAGE")) {
         String senderUsername = items[2];
-        if (!senderUsername.equals(clientUsernameMap.get(ID)) || !clientAuthMap.get(ID)) {
+        if (!senderUsername.equals(authenticatedClientUsernameMap.get(ID)) || authenticatedClientUsernameMap.get(ID) == null) {
           clients[findClient(ID)].send("RESPONSE SEND_MESSAGE 401 Unauthorized");
           return;
         }
@@ -141,10 +139,10 @@ public class ChatServer implements Runnable {
         byte[] signedByServer = MessageHandler.parseFromClientAndSign(senderUsername, UserManager.getPublicKey(senderUsername), cipherText);
         for (int i = 0; i < clientCount; i++) {
           // filter out those not authenticated
-          if (!clientAuthMap.get(clients[i].getID())) {
+          if (authenticatedClientUsernameMap.get(clients[i].getID()) == null) {
             continue;
           }
-          String deliverableMessage = MessageHandler.getDeliverable(clientUsernameMap.get(clients[i].getID()), signedByServer);
+          String deliverableMessage = MessageHandler.getDeliverable(authenticatedClientUsernameMap.get(clients[i].getID()), signedByServer);
 
           clients[i].send("COMMAND DELIVER_MESSAGE " + senderUsername + " " + deliverableMessage);
         }
@@ -155,10 +153,11 @@ public class ChatServer implements Runnable {
     if (input.equals(".bye")) {
       clients[findClient(ID)].send(".bye");
       remove(ID);
-    } else
-      for (int i = 0; i < clientCount; i++) {
-        clients[i].send(ID + ": " + input);
-      }
+    } else {
+//      for (int i = 0; i < clientCount; i++) {
+//        clients[i].send(ID + ": " + input); //
+//      }
+    }
   }
 
   synchronized void remove(int ID) {
@@ -167,8 +166,7 @@ public class ChatServer implements Runnable {
       ChatServerThread toTerminate = clients[pos];
       int idToRemove = clients[pos].getID();
       clientChallengeMap.remove(idToRemove);
-      clientAuthMap.remove(idToRemove);
-      clientUsernameMap.remove(idToRemove);
+      authenticatedClientUsernameMap.remove(idToRemove);
 
       System.out.println("Removing client thread " + ID + " at " + pos);
       if (pos < clientCount - 1)
