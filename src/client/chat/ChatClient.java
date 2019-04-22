@@ -166,7 +166,7 @@ public class ChatClient implements Runnable {
         }
       }
       if (action.equals("SERVER_SIGNATURE")) {
-        if (items.length != 3) return;
+        if (items.length != 4) return;
         String result = items[2];
         if (result.equals("200")) {
           byte[] signature = DataConverter.base64ToBytes(items[3]);
