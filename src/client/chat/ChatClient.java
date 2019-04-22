@@ -5,6 +5,7 @@ import client.auth.PublicKeysStorage;
 import client.message.MessageHandler;
 import shared.AsymmetricCrypto;
 import shared.DataConverter;
+import shared.Md5Helper;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -209,10 +210,23 @@ public class ChatClient implements Runnable {
       }
 
       if (action.equals("PUB_KEY")) {
-        if (items.length != 4) return;
+        if (items.length != 6) return;
+
         String name = items[2];
-        String key = items[3];
-        publicKeysStorage.setUserPublicKeyMap(name, DataConverter.base64ToBytes(key));
+        System.out.println(">> Public key of user " + name + " received from server, verifying");
+        byte[] publicKey = DataConverter.base64ToBytes(items[3]);
+        byte[] serverSignature = DataConverter.base64ToBytes(items[4]);
+        String checksum = items[5];
+        boolean isSignatureValid = AsymmetricCrypto.verifyData(publicKey, serverSignature, clientAuthenticator.getServerPublicKey());
+        boolean isChecksumVerified = Md5Helper.verify(publicKey, checksum);
+        System.out.println(">>> Server signature OK: " + isSignatureValid);
+        System.out.println(">>> Checksum OK: " + isChecksumVerified);
+        if (isSignatureValid && isChecksumVerified) {
+          System.out.printf(">>> Public key of [%s] is confirmed\n", name);
+          publicKeysStorage.setUserPublicKeyMap(name, publicKey);
+        } else {
+          System.out.printf(">>> Public key of [%s] is NOT trusted", name);
+        }
       }
 
       if (action.equals("QUIT")) {

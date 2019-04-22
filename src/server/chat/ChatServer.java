@@ -1,9 +1,11 @@
 package server.chat;
 
+import com.sun.security.ntlm.Server;
 import server.auth.ServerAuthenticator;
 import server.message.MessageHandler;
 import server.user.UserManager;
 import shared.DataConverter;
+import shared.Md5Helper;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -172,7 +174,9 @@ public class ChatServer implements Runnable {
             byte[] bytes = UserManager.getPublicKey(username);
             if (bytes != null && bytes.length > 0) {
               String publicKey = DataConverter.bytesToBase64(bytes);
-              clients[findClient(ID)].send(String.format("RESPONSE PUB_KEY %s %s", username, publicKey));
+              String signature = DataConverter.bytesToBase64(ServerAuthenticator.signMessage(bytes));
+              String checksum = Md5Helper.digest(bytes);
+              clients[findClient(ID)].send(String.format("RESPONSE PUB_KEY %s %s %s %s", username, publicKey, signature, checksum));
             }
           }
         }
