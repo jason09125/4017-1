@@ -58,7 +58,7 @@ public class Test {
     String challenge = "kdlghfasdm9r04c90rmq49mc9dsm-fadsf";
     byte[] signed = ServerAuthenticator.signChallenge(challenge);
 
-    try (InputStream input = new FileInputStream("./client-config/config.properties")) {
+    try (InputStream input = new FileInputStream("./client-config/eric.properties")) {
       Properties prop = new Properties();
       prop.load(input);
       byte[] publicKey = DataConverter.base64ToBytes(prop.getProperty("SERVER_MASTER_PUBLIC_KEY"));
