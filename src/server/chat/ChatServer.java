@@ -201,12 +201,7 @@ public class ChatServer implements Runnable {
         System.out.println("\n\t^^^^^^^^^^^^^^^^^^^^ PUBLIC KEY EXCHANGE ^^^^^^^^^^^^^^^^^^^^");
 
       }
-
-      return;
     }
-
-
-    clients[findClient(ID)].send("RESPONSE LOGOUT 200");
   }
 
   synchronized void remove(int ID) {
