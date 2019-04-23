@@ -1,6 +1,10 @@
 ## User manual
 
-### Log in from client
+Detailed steps of starting, logging in, chatting, creating a new user will be provided in sections:
+- **Instructions of building and running**
+- **Instructions of logging in, chatting and creating new user** 
+
+### Log in from client (signing on)
 
 After connecting to the server, input `.login {username} {password} {token}` to log in.
 
@@ -18,7 +22,7 @@ After connecting to the server, input `.login {username} {password} {token}` to 
 
 > Their public keys and private keys are stored in corresponding file in `./client-config` 
 
-### Quit the program from a client
+### Quit the program from a client (signing off)
 
 Anytime use `Ctrl + C` or input `.bye` to quit.
 
@@ -120,7 +124,7 @@ Or you can input `.bye` on client program to terminate it.
 
 > Note that you can use any key pair generator, as long as it's a RSA key pair. We just provide one generator for you for your convenience, it does not mean that you must use it.
 
-## Implementation Details
+## Implementation & Design Details
 
 ### Project File structure
 Let's look at our file structure first and we will go through each part of it in detail.
@@ -221,7 +225,13 @@ Note that in most of the cases, key and cipher text are in byte array in Java, s
 This section breaks down the workflow our the system into several phases.
 
 ### Registration Phase
+This phase is down by `server.user.UserManager` main function. See the previous section *User Manual* for detail and usage.
 
+Step:
+1. New user generate its kay pair (could use `client.auth.RegistrationHelper`, see section *User Manual* for detail and usage) and gets the public key ready
+1. New user inputs username, password and public key
+1. New user receives the two factor authentication token (shown on screen for only once)
+1. New user stores the token in an authenticator app (e.g. Google Authenticator)
 
 ### Server Authentication Phase
 In this phase, client checks the identity of the server (before logging in) by sending a challenge to the server. This prevents client from sending login credentials to a forged server.
@@ -331,11 +341,11 @@ We notate server's private key as `Kpriv(S)`, the incoming message, i.e. the out
 ```
 md5_verified := MD5V(cipher)
 if md5_verified:
-	decrypted := D(Ka, cipher)
-	sender_verified := SignV(Kpub(a), decrypted)
-	  if sender_verified:
-		server_signature := Sign(Kpriv(S), decrypted)
-		return decrypted || server_signature
+  decrypted := D(Ka, cipher)
+  sender_verified := SignV(Kpub(a), decrypted)
+    if sender_verified:
+    server_signature := Sign(Kpriv(S), decrypted)
+    return decrypted || server_signature
 ```
 
 > Note that `decrypted` is actually equal to `msg || sender_signature`, so the returned value is actually message with signatures, which is equal to `msg || sender_signature || server_signature`  
@@ -356,13 +366,13 @@ We notate the incoming data as `cipher`, public key of client A as `Kpub(a)`, an
 ```
 md5_verified := MD5V(cipher)
 if md5_verified:
-	decrypted := D(Kb, cipher)
-	// decrypted == msg || sender_signature || server_signature
-	
-	server_verified := SignV(Kpub(S), decrypted)
-	sender_verified := SignV(Kpub(a), decrypted)
-	if server_verified && sender_verified:
-	  return remove_signatures(decrypted)
+  decrypted := D(Kb, cipher)
+  // decrypted == msg || sender_signature || server_signature
+  
+  server_verified := SignV(Kpub(S), decrypted)
+  sender_verified := SignV(Kpub(a), decrypted)
+  if server_verified && sender_verified:
+    return remove_signatures(decrypted)
 ```
 
 ### Termination Phase
