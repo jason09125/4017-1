@@ -6,7 +6,9 @@ Detailed steps of starting, logging in, chatting, creating a new user will be pr
 
 ### Log in from client (signing on)
 
-After connecting to the server, input `.login {username} {password} {token}` to log in.
+1) Input server IP, port and name of the client .property at the Login Window
+
+2) Inupt client name, password and token at the Token Window
 
 > token is a time-based one time password (OTP), you should retrieve it from an app like Google Authenticator
 
@@ -24,7 +26,11 @@ After connecting to the server, input `.login {username} {password} {token}` to 
 
 ### Quit the program from a client (signing off)
 
-Anytime use `Ctrl + C` or input `.bye` to quit.
+Anytime use `Ctrl + C` or input `.bye` to quit in the console mode
+
+OR
+
+Close the GUI window and click YES button at the pop-up window
 
 ### Get config files ready
 
@@ -81,7 +87,8 @@ For those who don't install Maven, a package of the latest version is prepared f
 
 1. Ensure the server config file is ready in `./server-config/config.properties`
 1. Go to the directory where you have the JAR package ready
-1. Run server on a port, say 6000: `java -cp JavaChat-1.0.jar server.chat.ChatServer 6000`
+1. Run `java -cp JavaChat-1.0.jar server.chat.ChatServer' and then input the port number you want. 
+P.S. (The server IP is defalt as your IP)
 
 > Or use `mvn exec:java -Dexec.mainClass="server.chat.ChatServer" -Dexec.args="6000"` to run directly with Maven in root directory
 
@@ -90,7 +97,13 @@ For those who don't install Maven, a package of the latest version is prepared f
 1. Make sure server is already up, say at `localhost` and on port `6000`
 1. Get your client config file ready, say at the same path as the JAR package named `eric.properties`
 1. Go to the directory where you have the JAR package ready
-1. Run: `java -cp JavaChat-1.0.jar client.chat.ChatClient localhost 6000 eric.properties`
+1. Run: `java -cp JavaChat-1.0.jar client.chat.ChatClient'
+
+1) Input server IP, port and name of the client .property at the Login Window
+
+2) Inupt client name, password and token at the Token Window
+
+> token is a time-based one time password (OTP), you should retrieve it from an app like Google Authenticator
 
 > Or use `mvn exec:java -Dexec.mainClass="client.chat.ChatClient" -Dexec.args="localhost 6000 ./client-config/eric.properties"` to run directly with Maven in root directory
 
@@ -98,7 +111,11 @@ For those who don't install Maven, a package of the latest version is prepared f
 
 For both client and server programs, use keyboard shortcut `Ctrl + C` in the terminal to terminate it.
 
-Or you can input `.bye` on client program to terminate it.
+Or you can input `.bye` on client program to terminate it in the console mode
+
+OR
+
+Close the GUI window and click YES button at the pop-up window
 
 ### Instructions of logging in, chatting and creating new user
 
@@ -106,7 +123,7 @@ Or you can input `.bye` on client program to terminate it.
 1. Run client program according to the instructions above
 1. See the *"safe to log in"* notice on the client program (for server authentication)
 1. Get the one time password (token) from your authenticator app (e.g. Google Authenticator)
-1. Input `.login {username} {password} {token}` to login
+1. Inupt client name, password and token at the Token Window
 
 #### Chatting
 1. Send message as usual
