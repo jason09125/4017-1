@@ -5,8 +5,8 @@
 <modelVersion>4.0.0</modelVersion>
 
 <groupId>Comp</groupId>
-<artifactId>SecurityDemo</artifactId>
-<version>1.0-SNAPSHOT</version>
+<artifactId>JavaChat</artifactId>
+<version>1.0</version>
   <build>
     <plugins>
       <plugin>
