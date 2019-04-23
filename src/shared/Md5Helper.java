@@ -14,7 +14,6 @@ public class Md5Helper {
       while (hash.length() < 32) {
         hash = "0" + hash;
       }
-      System.out.println("MD5 generated: " + hash);
       return hash.toUpperCase();
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();

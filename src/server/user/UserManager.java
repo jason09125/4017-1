@@ -29,10 +29,10 @@ public class UserManager {
 
     boolean isDigitalSignatureValid = AsymmetricCrypto.verifyData(challenge.getBytes(), signedData, publicKey);
 
-    System.out.println("> Logging in: " + username);
-    System.out.println(">>> Password OK: " + isPasswordValid);
-    System.out.println(">>> Token OK: " + isTokenValid);
-    System.out.println(">>> Digital Signature OK: " + isDigitalSignatureValid);
+    System.out.println("\t\t> Logging in: " + username);
+    System.out.println("\t\t>>> Password OK: " + isPasswordValid);
+    System.out.println("\t\t>>> Token OK: " + isTokenValid);
+    System.out.println("\t\t>>> Digital Signature OK: " + isDigitalSignatureValid);
 
     return isPasswordValid && isTokenValid && isDigitalSignatureValid;
   }
