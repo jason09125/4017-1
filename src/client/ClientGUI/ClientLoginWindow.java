@@ -116,9 +116,9 @@ public class ClientLoginWindow {
     public void close(Integer option) {
         switch (option) {
             case 0:
-            frame.dispose();
-            System.exit(0);
-            break;
+                frame.dispose();
+                System.exit(0);
+                break;
             default:
                 frame.dispose();
                 break;

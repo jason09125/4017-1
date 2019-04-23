@@ -1,5 +1,6 @@
 package client.chat;
 
+import client.ClientGUI.ClientChatWindow;
 import client.auth.ClientAuthenticator;
 import client.auth.PublicKeysStorage;
 import client.message.MessageHandler;
@@ -30,9 +31,9 @@ public class ChatClient implements Runnable {
     private String challengeFromServer;
     private String username;
     private boolean hasAuthenticated;
-    private ClientTokenWindow tokenWindow;
     private static ClientLoginWindow login_win;
-    //  private ClientWindow clientWin;
+    private ClientTokenWindow tokenWindow;
+    private ClientChatWindow clientWin;
 
     public ChatClient(String serverName, int serverPort, String configFile) {
         this.clientAuthenticator = new ClientAuthenticator(configFile, login_win);
@@ -144,7 +145,7 @@ public class ChatClient implements Runnable {
                 System.out.printf("New user (%s) joined, public key: %s\n", username, publicKey);
                 publicKeysStorage.setUserPublicKeyMap(username, DataConverter.base64ToBytes(publicKey));
             }
-
+            System.out.println("receive: " + msg);
             if (action.equals("DELIVER_MESSAGE")) {
                 if (items.length != 4) return;
                 String senderUsername = items[2];
@@ -154,9 +155,9 @@ public class ChatClient implements Runnable {
                     System.out.printf("[Verification Failed] Message from %s is not trusted\n", senderUsername);
                     return;
                 }
+                clientWin.update_data(senderUsername + ": " + plainText, 1);
                 System.out.printf("\n[%s]: %s\n", senderUsername, plainText);
             }
-
             return;
         }
 
@@ -206,8 +207,12 @@ public class ChatClient implements Runnable {
                     byte[] encryptedWithSelfPublicKey = DataConverter.base64ToBytes(sessionKey);
                     clientAuthenticator.setSessionKey(encryptedWithSelfPublicKey, true);
                     this.hasAuthenticated = true;
+
+                    tokenWindow.close(0);
+                    clientWin = new ClientChatWindow(this);
                 } else {
                     String statusMessage = items.length >= 4 ? items[3] : "";
+
                     System.out.println(">> [Server]: Authentication failed - " + statusCode + " " + statusMessage);
                 }
             }
@@ -264,6 +269,10 @@ public class ChatClient implements Runnable {
                 stop();
             }
         }
+    }
+
+    public String get_Name() {
+        return this.username;
     }
 
     private void start() throws IOException {

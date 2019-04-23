@@ -110,9 +110,18 @@ public class ClientTokenWindow {
         contentPane.add(bg);
     }
 
-    protected void close() {
-        frame.dispose();
-        System.exit(0);
+    public void close(Integer option) {
+        switch (option) {
+            case 0:
+                frame.dispose();
+                break;
+            case 1:
+                frame.dispose();
+                System.exit(0);
+                break;
+            default:
+                break;
+        }
     }
 
     public void notice(int action, String noti_msg) {
@@ -133,7 +142,7 @@ public class ClientTokenWindow {
                 String option = options[choice];
 
                 if (option.equals(options[0])) {
-                    close();
+                    close(1);
                 }
                 break;
             case 1:
