@@ -1,5 +1,7 @@
 ## User manual
 
+
+
 Detailed steps of starting, logging in, chatting, creating a new user will be provided in sections:
 - **Instructions of building and running**
 - **Instructions of logging in, chatting and creating new user** 
