@@ -14,6 +14,8 @@ After connecting to the server, input `.login {username} {password} {token}` to 
 | Thomas        | qwerty      | WOGH23LCOOSWQ7TP        |
 | Joe           | 123456      | 6MP6EPHBCYI4POYC        |
 
+> You should use the above 2FA secret to set up a time-based OTP authenticator like Google Authenticator first.
+
 > Their public keys and private keys are stored in corresponding file in `./client-config` 
 
 ### Quit the program from a client
