@@ -92,9 +92,23 @@ For those who don't install Maven, a package of the latest version is prepared f
 
 #### Terminating
 
-For both client and server programs, input `Ctrl + C` in the terminal to terminate it
+For both client and server programs, use keyboard shortcut `Ctrl + C` in the terminal to terminate it.
 
-#### Side note: creating a new user
+Or you can input `.bye` on client program to terminate it.
+
+### Instructions of logging in, chatting and creating new user
+
+#### Logging in a user
+1. Run client program according to the instructions above
+1. See the *"safe to log in"* notice on the client program (for server authentication)
+1. Get the one time password (token) from your authenticator app (e.g. Google Authenticator)
+1. Input `.login {username} {password} {token}` to login
+
+#### Chatting
+1. Send message as usual
+1. You will see all the authenticity and integrity check along the way
+
+#### Creating a new user
 
 1. Follow the steps for building (or use the prepared Jar package for you)
 1. A key pair generator for registration is ready for you, run this: `java -cp ./target/JavaChat-1.0.jar client.auth.RegistrationHelper`
@@ -216,15 +230,15 @@ Steps:
 Finally, after getting ready of all the session key and public keys, we can now start to chat.
 
 We will use the following notations in the following paragraphs.
-`msg`: message
-`cipher`: any kind of encrypted data
-`||`: string concatenation
-`E`: symmetric encryption function
-`D`: symmetric decryption function
-`Sign`: digital signing function
-`SignV`: signature verifying function
-`MD5`: checksum hashing function (MD5 is used in our case)
-`MD5V`: checksum verifying function
+- `msg`: message
+- `cipher`: any kind of encrypted data
+- `||`: string concatenation
+- `E`: symmetric encryption function
+- `D`: symmetric decryption function
+- `Sign`: digital signing function
+- `SignV`: signature verifying function
+- `MD5`: checksum hashing function (MD5 is used in our case)
+- `MD5V`: checksum verifying function
 
 #### 1. Client A Sending Message to Server
 We notate the session key of the client A as `Ka` and private key as `Kpriv(a)`. Hence our encryption algorithm would be as follow:
@@ -271,3 +285,17 @@ if md5_verified:
 	if server_verified && sender_verified:
 	  return remove_signatures(decrypted)
 ```
+
+### Termination Phase
+Server will automatically disconnects a client if it's been idle for 5 minutes.
+This ensure security in the case that user leaves the office with the laptop open and client logged in.
+This also prevents idle clients from taking and wasting network resources.
+
+Connected clients (both authenticated or unauthenticated) can also input `.bye` to terminate.
+
+Steps:
+1. Client sends termination command `COMMAND QUIT` to the server.
+2. Server responds termination response `RESPONSE QUIT` and disconnects the client.
+3. Client disconnects and terminates.
+
+> Note that a force termination could be triggered using `Ctrl + C` keyboard input.
