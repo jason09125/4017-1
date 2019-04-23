@@ -122,20 +122,99 @@ Or you can input `.bye` on client program to terminate it.
 
 ## Implementation Details
 
-### Database Mock
+### Project File structure
+Let's look at our file structure first and we will go through each part of it in detail.
 
-#### Storing users using Object Serialization and Deserialization
+```
+┌── client
+│   ├── auth
+│   │   ├── ClientAuthenticator
+│   │   ├── PublicKeysStorage
+│   │   └── RegistrationHelper
+│   │
+│   ├── chat
+│   │   ├── ChatClient
+│   │   └── ChatClientThread
+│   │ 
+│   └── message
+│       └── MessageHandler
+│
+├── server
+│   ├── auth
+│   │   └── ServerAuthenticator
+│   │
+│   ├── chat
+│   │   ├── ChatServer
+│   │   └── ChatServerThread
+│   │
+│   ├── db
+│   │   ├── DatabaseMock
+│   │   └── FileManager
+│   │
+│   ├── message
+│   │   └── MessageHandler
+│   │
+│   └── user
+│       ├── User <<implements Serializable>>
+│       └── UserManager
+│
+└── shared
+    ├── AsymmetricCrypto
+    ├── DataConverter
+    ├── Md5Helper
+    └── SymmetriCrypto
+```
+
+Mainly the it is separate into three parts, client package, server package and shared package. Note that for deployment in production, we should create builds and deploy client and server separately, but for simplicity in this project, we make a build containing both of them.
+
+#### Client side package
+- `auth.ClientAuthenticator` deals with key management (storing public key,  private key and session key) for the client instance, and it also signs the challenge sent from the server.
+- `auth.PublicKeysStorage` manages other users' public keys, it supports caching received public keys in client side local file system.
+- `auth.RegistrationHelper` indeed is a key pair generator, it simply provides a main function generating key pair for new user to sign up. Note that new user can use any RSA key pair generator, we just create such class for convenience.
+- `chat.ChatClient` is provided to us, which we do not change too much. We only add some new command and response handling logic in it. For the detail of what and how commands and responses are handled, please see section *Workflow Breakdown*.
+- `chat.ChatClient` is provided to us, and we make no changes except for several line of logging in this file.
+- `message.MessageHandler` decrypts and verifies the incoming message from the server, but also encrypts and signs the message sending to the server.
+
+#### Server side package
+- `auth.ServerAuthenticator` signs data for the server using *Sever Master Private Key*, including challenge sent from client, session key and public key (see section Workflow Breakdown for further detail). It also reads server config file to get the private key.
+- `auth.chat.ChatServer` is provided to us, and we do not change too much. We only add some new command and response handling logic in it. For the detail of what and how commands and responses are handled, please see section *Workflow Breakdown*.
+- `auth.chat.ChatServerThread` is provided to us, and we make no changes except for several line of logging in this file.
+- `db.DatabaseMock` mocks a database for persisting user information (in server side local file system). For detailed information, please see the following *Database Mock* section below.
+- `db.FileManager` helps mock database to deal with local file system and object serialization/deserialization.
+- `message.MessageHandler` decrypts and verifies the incoming message from a client, but also encrypts and signs the message sending to the other clients.
+- `user.User` is a serializable class for mirroring user objects, where username, password hash (see the below sections to understand why it's hashed), public key and two-factor authentication secret are stored. For more information, please see the following *Database Mock* section below.
+- `user.Manager` deals with client/user authentication for the server, and it generates a client session key for each authenticated client. Note that it also provides register function for new user on the server side. You should run this separately on server, see *User Manual* section for more information about how to create a new user.
+
+#### Shared package
+- `AsymmetricCrypto` is a utility class dealing with signing, signature verifying, asymmetric encryption/decryption.
+- `DataConverter` helps convert byte array to base64 string and vice versa. It also converts java.security.Key instance to base64 string. For more information, see *Data Type Conversion* section below.
+- `Md5Helper` digests a piece of data and generates the MD5 checksum of it, and also checks the integrity of data by verifying whether or not a piece of data hashes to the provide checksum.
+- `SymmetricCrypto` is a utility class dealing with symmetric encryption/decryption.
+
+> Even though client and server share it in this setup, in production environment client and server are deployed separately and hence the shared package should also be deployed twice with client and server respectively (for security, architect and maintenance concerns).
+
+### Database Mock
+To persist our user information, while at the same time make things simple to focus on security and cryptography design, we use server's local file system (directory path: `/db`) to replace traditional database. This indeeds mock a very basic database. For easy understanding, we call such method of persistent storage Database Mock.
+
+User are stored in serializable objects with the following fields:
+1. `username` (String, unique, primary key)
+2. `passwordHash` (String)
+3. `publicKey` (String)
+4. `tfaSecret` (String)
+
+Our implementation ensures username is unique, and both username and password are case-sensitive. Note that we use *BCrypt* algorithm to generate the hash of the password and store it in our Database Mock. Note that we don't store the password plaintext on purpose to prevent password leakage (even the database admin itself cannot see the password). Besides, we specifically use BCrypt but not other hash function such as MD5, to ensure that each password is encrypted several rounds with salting, and hence to prevent *rainbow table attack*.
+
+Note that the User class implements Serializable interface to support object serialization (for writing to file) and deserialization (for reading from file).
 
 ### Data Type Conversion
-Base64 String to Bytes
-Bytes to Base64 String
-Key to Bytes
-Bytes to Symmetric Key
-Bytes to Public Key
-Bytes to Private Key
+Note that in most of the cases, key and cipher text are in byte array in Java, so we need some conversion methods to convert between byte array and string. We chose a standard encoding format called *Base64* to convert byte array to string and vice versa. More detail can be seen in class `shared.DataConverter`
 
 ### Crypto Algorithms
-
+- We apply `RSA` for digital signature (signing data) and asymmetric encryption (encrypting session key).
+- We apply `AES` for symmetric data encryption (session key is a key under AES, we use it to encrypt messages).
+- We apply `BCrypt` to hash password for each user (prevent password from being read in case of database leakage and *rainbow table attack*).
+- We use time-based one time password implemented in `com.warrenstrange.googleauth.GoogleAuthenticator` to achieve two-factor authentication.
+- We use `MD5` as a way to generate checksum for data. This way we can ensure the integrity of the data.
 
 
 ## Workflow Breakdown
