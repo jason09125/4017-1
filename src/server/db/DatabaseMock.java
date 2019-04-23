@@ -24,9 +24,9 @@ public class DatabaseMock {
     try {
       return FileManager.getByKey(username);
     } catch (IOException e) {
-      e.printStackTrace();
+//      e.printStackTrace();
     } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+//      e.printStackTrace();
     }
     return null;
   }

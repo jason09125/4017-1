@@ -16,7 +16,14 @@ public class UserManager {
   }
 
   public static boolean auth(String username, String plainPassword, int token, String challenge, byte[] signedData) {
+    System.out.println("\t\t> Logging in: " + username);
+
     User user = DatabaseMock.getUser(username);
+    if (user == null) {
+      System.out.println("\t\t>>> User does not exist");
+      return false;
+    }
+
     String encryptedPassword = user.getPasswordHash();
     String tfaSecret = user.getTfaSecret();
     byte[] publicKey = getPublicKey(username);
@@ -29,7 +36,7 @@ public class UserManager {
 
     boolean isDigitalSignatureValid = AsymmetricCrypto.verifyData(challenge.getBytes(), signedData, publicKey);
 
-    System.out.println("\t\t> Logging in: " + username);
+
     System.out.println("\t\t>>> Password OK: " + isPasswordValid);
     System.out.println("\t\t>>> Token OK: " + isTokenValid);
     System.out.println("\t\t>>> Digital Signature OK: " + isDigitalSignatureValid);

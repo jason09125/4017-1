@@ -125,6 +125,7 @@ public class ChatServer implements Runnable {
           }
 
           System.out.println("\n\t-------------------- AUTH OK --------------------\n");
+          System.out.println("\t\t>>> Exchanging session key");
           System.out.println("\t\t>>> Sending back usernames of online clients for public key exchange process");
           clients[findClient(ID)].send(String.format("RESPONSE AUTH 200 %s %s %s", username, sessionKeyStr, onlineUsersSb.toString()));
           authenticatedClientUsernameMap.put(ID, username);
