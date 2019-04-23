@@ -388,3 +388,11 @@ Steps:
 3. Client disconnects and terminates.
 
 > Note that a force termination could be triggered using `Ctrl + C` keyboard input.
+
+## Extra Security Policy
+- User registration is suggested to be done within the intranet of the company or organization that uses this chatting system. As two factor authentication secret is sent to client without extra protection. Note that this is the only time this secret gets transmitted in the network, so we only need to guarantee that registration happens in a secured environment. 
+- Database (Database Mock in our implementation) should be protected properly.
+- No one is accessible to server's *Server Master Private Key* in its config file.
+- It's recommended that client retrieve server's *Server Master Public Key* from a trusted channel instead of retrieving it from the server itself (server could be forged).
+- As long as server passes the challenge check by client, server should be trusted, given that server's *Server Master Public Key* is properly distributed with integrity to the client.
+ 
