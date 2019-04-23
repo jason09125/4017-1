@@ -176,13 +176,13 @@ Mainly the it is separate into three parts, client package, server package and s
 - `auth.PublicKeysStorage` manages other users' public keys, it supports caching received public keys in client side local file system.
 - `auth.RegistrationHelper` indeed is a key pair generator, it simply provides a main function generating key pair for new user to sign up. Note that new user can use any RSA key pair generator, we just create such class for convenience.
 - `chat.ChatClient` is provided to us, which we do not change too much. We only add some new command and response handling logic in it. For the detail of what and how commands and responses are handled, please see section *Workflow Breakdown*.
-- `chat.ChatClient` is provided to us, and we make no changes except for several line of logging in this file.
+- `chat.ChatClientThread` is provided to us, and we make no changes except for several lines of logging in this file.
 - `message.MessageHandler` decrypts and verifies the incoming message from the server, but also encrypts and signs the message sending to the server.
 
 #### Server side package
 - `auth.ServerAuthenticator` signs data for the server using *Sever Master Private Key*, including challenge sent from client, session key and public key (see section Workflow Breakdown for further detail). It also reads server config file to get the private key.
-- `auth.chat.ChatServer` is provided to us, and we do not change too much. We only add some new command and response handling logic in it. For the detail of what and how commands and responses are handled, please see section *Workflow Breakdown*.
-- `auth.chat.ChatServerThread` is provided to us, and we make no changes except for several line of logging in this file.
+- `chat.ChatServer` is provided to us, and we do not change too much. We only add some new command and response handling logic in it. For the detail of what and how commands and responses are handled, please see section *Workflow Breakdown*.
+- `.chat.ChatServerThread` is provided to us, and we make no changes except for several lines of logging in this file.
 - `db.DatabaseMock` mocks a database for persisting user information (in server side local file system). For detailed information, please see the following *Database Mock* section below.
 - `db.FileManager` helps mock database to deal with local file system and object serialization/deserialization.
 - `message.MessageHandler` decrypts and verifies the incoming message from a client, but also encrypts and signs the message sending to the other clients.
