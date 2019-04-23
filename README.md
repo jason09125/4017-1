@@ -6,6 +6,16 @@ After connecting to the server, input `.login {username} {password} {token}` to 
 
 > token is a time-based one time password (OTP), you should retrieve it from an app like Google Authenticator
 
+#### Pre-register users:
+
+| Username      | Password    | Two-factor Auth Secret  |
+|:------------- |:----------- |:----------------------- |
+| Eric          | 123456      | 4ZC2262UODCPBI3A        |
+| Thomas        | qwerty      | WOGH23LCOOSWQ7TP        |
+| Joe           | 123456      | 6MP6EPHBCYI4POYC        |
+
+> Their public keys and private keys are stored in corresponding file in `./client-config` 
+
 ### Quit the program from a client
 
 Anytime use `Ctrl + C` or input `.bye` to quit.
