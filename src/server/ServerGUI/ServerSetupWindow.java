@@ -1,14 +1,13 @@
 package server.ServerGUI;
 
+import server.chat.ChatServer;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
-import javax.swing.*;
-
-import server.chat.ChatServer;
 
 public class ServerSetupWindow {
 	private JFrame frame;
@@ -91,7 +90,7 @@ public class ServerSetupWindow {
 		String file_path = System.getProperty("user.dir");
 		ImageIcon background = new ImageIcon(file_path + "\\src\\server\\image\\server_setup.png");
 		Image image = background.getImage(); // transform it
-		Image newimg = image.getScaledInstance(300, 300,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+		Image newimg = image.getScaledInstance(300, 300,  Image.SCALE_SMOOTH); // scale it the smooth way
 		background = new ImageIcon(newimg);
 		bg = new JLabel(background);
 		bg.setBounds(0, 0, 300, 300);

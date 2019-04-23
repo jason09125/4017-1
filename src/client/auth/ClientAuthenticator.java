@@ -1,5 +1,6 @@
 package client.auth;
 
+import client.ClientGUI.ClientLoginWindow;
 import shared.AsymmetricCrypto;
 import shared.DataConverter;
 
@@ -30,7 +31,7 @@ public class ClientAuthenticator {
     return sessionKey;
   }
 
-  public ClientAuthenticator(String configPath) { // sample path: "./client-config/config.properties"
+  public ClientAuthenticator(String configPath, ClientLoginWindow login_win) { // sample path: "./client-config/config.properties"
     try (InputStream input = new FileInputStream(configPath)) {
       Properties prop = new Properties();
       prop.load(input);
@@ -38,6 +39,7 @@ public class ClientAuthenticator {
       this.selfPrivateKey = DataConverter.base64ToBytes(prop.getProperty("CLIENT_MASTER_PRIVATE_KEY"));
       this.serverPublicKey = DataConverter.base64ToBytes(prop.getProperty("SERVER_MASTER_PUBLIC_KEY"));
     } catch (IOException e) {
+      login_win.notice(1, "File not found. \nPlease place it in the client-config file");
       e.printStackTrace();
     }
   }
