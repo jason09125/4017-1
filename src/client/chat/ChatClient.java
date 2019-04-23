@@ -67,7 +67,13 @@ public class ChatClient implements Runnable {
             }
             String username = items[1];
             String password = items[2];
-            int token = Integer.parseInt(items[3]);
+            int token = 0;
+            try {
+              token = Integer.parseInt(items[3]);
+            } catch (NumberFormatException e) {
+              System.out.println("Invalid token type, token should be a number");
+              continue;
+            }
             String signature = clientAuthenticator.signChallenge(this.challengeFromServer);
             String cmd = String.format("COMMAND LOGIN %s %s %s %s", username, password, token, signature);
             streamOut.writeUTF(cmd);
@@ -128,7 +134,7 @@ public class ChatClient implements Runnable {
           System.out.printf("[Verification Failed] Message from %s is not trusted\n", senderUsername);
           return;
         }
-        System.out.printf("[%s]: %s\n", senderUsername, plainText);
+        System.out.printf("\n[%s]: %s\n", senderUsername, plainText);
       }
 
       return;
@@ -213,7 +219,7 @@ public class ChatClient implements Runnable {
         if (items.length != 6) return;
 
         String name = items[2];
-        System.out.println(">> Public key of user " + name + " received from server, verifying");
+        System.out.println("> Public key of user " + name + " received from server, verifying");
         byte[] publicKey = DataConverter.base64ToBytes(items[3]);
         byte[] serverSignature = DataConverter.base64ToBytes(items[4]);
         String checksum = items[5];

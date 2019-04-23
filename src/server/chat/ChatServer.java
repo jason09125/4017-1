@@ -1,6 +1,5 @@
 package server.chat;
 
-import com.sun.security.ntlm.Server;
 import server.auth.ServerAuthenticator;
 import server.message.MessageHandler;
 import server.user.UserManager;
@@ -38,7 +37,7 @@ public class ChatServer implements Runnable {
     Thread thisThread = Thread.currentThread();
     while (thread == thisThread) {
       try {
-        System.out.println("Waiting for a client ...");
+//        System.out.println("Waiting for a client ...");
         addThread(server.accept());
       } catch (IOException ioe) {
         System.out.println("Server accept error: " + ioe);
@@ -68,7 +67,7 @@ public class ChatServer implements Runnable {
   }
 
   synchronized void handle(int ID, String input) {
-    System.out.printf(">>> Handling %s: %s\n", ID, input);
+    System.out.printf("Handling %s: %s\n", ID, input);
 
     // check machine command
     if (input.matches("^COMMAND .*$")) {
@@ -79,9 +78,9 @@ public class ChatServer implements Runnable {
       String action = items[1];
       if (action.equals("SERVER_AUTH")) {
         String challenge = items[2];
-        System.out.printf("Challenged by client %s: %s\n", ID, challenge);
+        System.out.printf("\t> Challenged by client %s: %s\n", ID, challenge);
         String signatureStr = DataConverter.bytesToBase64(ServerAuthenticator.signChallenge(challenge));
-        System.out.println("Digital signature generated: " + signatureStr);
+        System.out.println("\t>>> Digital signature generated, sending back: " + signatureStr + "\n");
         clients[findClient(ID)].send("RESPONSE SERVER_SIGNATURE 200 " + signatureStr);
       }
 
@@ -107,8 +106,10 @@ public class ChatServer implements Runnable {
           }
         }
 
+        System.out.println("\n\t-------------------- AUTHENTICATING --------------------\n");
         String challenge = clientChallengeMap.get(ID);
         boolean authenticated = UserManager.auth(username, password, token, challenge, signature);
+        System.out.println("\n\t^^^^^^^^^^^^^^^^^^^^ AUTHENTICATING ^^^^^^^^^^^^^^^^^^^^\n");
         if (authenticated) {
           UserManager.generateSessionKey(username);
           byte[] key = UserManager.getSessionKey(username, true);
@@ -122,19 +123,25 @@ public class ChatServer implements Runnable {
               onlineUsersSb.append("===");
             }
           }
+
+          System.out.println("\n\t-------------------- AUTH OK --------------------\n");
+          System.out.println("\t\t>>> Sending back usernames of online clients for public key exchange process");
           clients[findClient(ID)].send(String.format("RESPONSE AUTH 200 %s %s %s", username, sessionKeyStr, onlineUsersSb.toString()));
           authenticatedClientUsernameMap.put(ID, username);
 
           // broadcast client's public key
           String pubKeyStr = DataConverter.bytesToBase64(UserManager.getPublicKey(username));
-          System.out.printf("Authenticated - Broadcasting user's public key to other connected clients: %s %s\n", username, pubKeyStr);
+          System.out.printf("\t\t>>> Broadcasting user's public key to other connected clients: %s %s\n", username, pubKeyStr);
           for (int i = 0; i < clientCount; i++) {
             // check authentication before sending this, filter out those not authenticated
-            if (authenticatedClientUsernameMap.get(clients[i].getID()) == null) {
+            String broadcastTo = authenticatedClientUsernameMap.get(clients[i].getID());
+            if (broadcastTo == null) {
               continue;
             }
+            System.out.printf("\t\t>>> Broadcasting to %s\n", broadcastTo);
             clients[i].send("COMMAND NEW_USER " + username + " " + pubKeyStr);
           }
+          System.out.println("\n\t^^^^^^^^^^^^^^^^^^^^ AUTH OK ^^^^^^^^^^^^^^^^^^^^\n");
 
         } else {
           clients[findClient(ID)].send("RESPONSE AUTH 403 Invalid_credentials");
@@ -148,16 +155,22 @@ public class ChatServer implements Runnable {
           return;
         }
         String cipherText = items[3];
+        System.out.println("\n\t-------------------- HANDLING NEW INCOMING MESSAGE --------------------");
+        System.out.println("\n\t\t> Sender is " + senderUsername);
         byte[] signedByServer = MessageHandler.parseFromClientAndSign(senderUsername, UserManager.getPublicKey(senderUsername), cipherText);
         for (int i = 0; i < clientCount; i++) {
           // filter out those not authenticated
           if (authenticatedClientUsernameMap.get(clients[i].getID()) == null) {
             continue;
           }
-          String deliverableMessage = MessageHandler.getDeliverable(authenticatedClientUsernameMap.get(clients[i].getID()), signedByServer);
+          String receiverUsername = authenticatedClientUsernameMap.get(clients[i].getID());
+          System.out.println("\n\t\t> Delivering to " + receiverUsername);
+          String deliverableMessage = MessageHandler.getDeliverable(receiverUsername, signedByServer);
 
           clients[i].send("COMMAND DELIVER_MESSAGE " + senderUsername + " " + deliverableMessage);
+          System.out.println();
         }
+        System.out.println("\t^^^^^^^^^^^^^^^^^^^^ HANDLING NEW INCOMING MESSAGE ^^^^^^^^^^^^^^^^^^^^\n");
       }
 
       if (action.equals("QUIT")) {
@@ -169,6 +182,7 @@ public class ChatServer implements Runnable {
         if (items.length != 3) return;
 
         String[] usernames = items[2].split("===");
+        System.out.println("\n\t-------------------- PUBLIC KEY EXCHANGE --------------------\n");
         for (String username : usernames) {
           if (username != null && username.length() > 0) {
             byte[] bytes = UserManager.getPublicKey(username);
@@ -176,10 +190,15 @@ public class ChatServer implements Runnable {
               String publicKey = DataConverter.bytesToBase64(bytes);
               String signature = DataConverter.bytesToBase64(ServerAuthenticator.signMessage(bytes));
               String checksum = Md5Helper.digest(bytes);
+              System.out.printf("\t\t> Distributing public key of %s: %s\n", username, publicKey);
+              System.out.printf("\t\t>>> Server signature: %s\n", signature);
+              System.out.printf("\t\t>>> Checksum: %s\n", checksum);
               clients[findClient(ID)].send(String.format("RESPONSE PUB_KEY %s %s %s %s", username, publicKey, signature, checksum));
             }
           }
         }
+        System.out.println("\n\t^^^^^^^^^^^^^^^^^^^^ PUBLIC KEY EXCHANGE ^^^^^^^^^^^^^^^^^^^^");
+
       }
 
       return;
@@ -231,7 +250,7 @@ public class ChatServer implements Runnable {
         int clientId = clients[clientCount].getID();
         clientChallengeMap.put(clientId, challenge);
         clients[clientCount].send("COMMAND CHALLENGE " + challenge);
-        System.out.printf(">>> Challenging client %s: %s\n", clientId, challenge);
+        System.out.printf("\t> Challenging client %s: %s\n\n", clientId, challenge);
 
         clientCount++;
       } catch (IOException ioe) {

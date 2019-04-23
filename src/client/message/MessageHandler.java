@@ -17,13 +17,19 @@ public class MessageHandler {
   }
 
   public String getDeliverable(String plainText) {
+    if (plainText == null) return null;
+
     byte[] plainTextBytes = plainText.getBytes();
+    System.out.println(">>> Signing with client private key");
     byte[] signature = AsymmetricCrypto.signData(plainTextBytes, clientAuthenticator.getSelfPrivateKey());
     byte[] combined = DataConverter.combineByteArrays(plainTextBytes, signature);
 
+    System.out.println(">>> Encrypting with session key");
     byte[] sessionKeyEncrypted = SymmetricCrypto.encrypt(combined, clientAuthenticator.getSessionKey());
 
+    System.out.println(">>> Generating checksum");
     String md5 = Md5Helper.digest(sessionKeyEncrypted);
+    System.out.println(">>> MD5 checksum: " + md5);
     byte[] withMd5 = DataConverter.combineByteArrays(sessionKeyEncrypted, md5.getBytes());
     return DataConverter.bytesToBase64(withMd5);
   }
@@ -33,12 +39,14 @@ public class MessageHandler {
     String md5 = new String(DataConverter.getChecksumFromBytes(withChecksum));
     byte[] encryptedWithSessionKey = DataConverter.getDataFromBytesWithChecksum(withChecksum);
 
+    System.out.println(">>> Verifying MD5: " + md5);
     boolean isChecksumVerified = Md5Helper.verify(encryptedWithSessionKey, md5);
     System.out.println(">>> Checksum OK: " + isChecksumVerified);
     if (!isChecksumVerified) {
       return null; // todo: return warning
     }
 
+    System.out.println(">>> Decrypting with session key");
     byte[] serverSigned = SymmetricCrypto.decrypt(encryptedWithSessionKey, clientAuthenticator.getSessionKey());
 
     byte[] dataWithoutServerSignature = DataConverter.getDataFromSigned(serverSigned);
