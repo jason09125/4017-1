@@ -146,7 +146,14 @@ Let's look at our file structure first and we will go through each part of it in
 │   ├── chat
 │   │   ├── ChatClient
 │   │   └── ChatClientThread
-│   │ 
+│   │
+│   ├── ClientGUI
+│   │   ├── ClientChatWindow
+│   │   ├── ClientLoginWindow
+│   │   └── ClientTokenWindow
+│   │
+│   ├── image
+│   │
 │   └── message
 │       └── MessageHandler
 │
@@ -162,8 +169,15 @@ Let's look at our file structure first and we will go through each part of it in
 │   │   ├── DatabaseMock
 │   │   └── FileManager
 │   │
+│   ├── group
+│   │	└── GroupHandler
+│   │
 │   ├── message
 │   │   └── MessageHandler
+│   │
+│   ├── ServerGUI
+│   │   ├── ServerSetupWindow
+│   │   └── ServerWindow
 │   │
 │   └── user
 │       ├── User <<implements Serializable>>
@@ -185,6 +199,10 @@ Mainly the it is separate into three parts, client package, server package and s
 - `chat.ChatClient` is provided to us, which we do not change too much. We only add some new command and response handling logic in it. For the detail of what and how commands and responses are handled, please see section *Workflow Breakdown*.
 - `chat.ChatClientThread` is provided to us, and we make no changes except for several lines of logging in this file.
 - `message.MessageHandler` decrypts and verifies the incoming message from the server, but also encrypts and signs the message sending to the server.
+- `ClientGUI.ClientLoginWindow` providing a GUI for the user to input the server IP, port number and the property file name.
+- `ClientGUI.ClientTokenWindow` roviding a GUI for the user to input his/her user name, password and token.
+- `ClientGUI.ClientChatWindow` providing a GUI for the user to chat.
+- `image` is the folder that holds the images of the GU.
 
 #### Server side package
 - `auth.ServerAuthenticator` signs data for the server using *Sever Master Private Key*, including challenge sent from client, session key and public key (see section Workflow Breakdown for further detail). It also reads server config file to get the private key.
@@ -200,7 +218,8 @@ Mainly the it is separate into three parts, client package, server package and s
 - `AsymmetricCrypto` is a utility class dealing with signing, signature verifying, asymmetric encryption/decryption.
 - `DataConverter` helps convert byte array to base64 string and vice versa. It also converts java.security.Key instance to base64 string. For more information, see *Data Type Conversion* section below.
 - `Md5Helper` digests a piece of data and generates the MD5 checksum of it, and also checks the integrity of data by verifying whether or not a piece of data hashes to the provide checksum.
-- `SymmetricCrypto` is a utility class dealing with symmetric encryption/decryption.
+- `ServerGUI.ServerSetupWindow` is for entering the port of the server.
+- `ServerGUI.ServerWindow` is for display the encrypted messages between clients.
 
 > Even though client and server share it in this setup, in production environment client and server are deployed separately and hence the shared package should also be deployed twice with client and server respectively (for security, architect and maintenance concerns).
 
@@ -394,7 +413,7 @@ Steps:
 2. Server responds termination response `RESPONSE QUIT` and disconnects the client.
 3. Client disconnects and terminates.
 
-> Note that a force termination could be triggered using `Ctrl + C` keyboard input.
+> Note that a force termination could be triggered by closing the GUI
 
 ## Extra Security Policy
 - User registration is suggested to be done within the intranet of the company or organization that uses this chatting system. As two factor authentication secret is sent to client without extra protection. Note that this is the only time this secret gets transmitted in the network, so we only need to guarantee that registration happens in a secured environment. 
