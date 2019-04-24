@@ -1,6 +1,7 @@
 package server.chat;
 
 import server.auth.ServerAuthenticator;
+import server.group.GroupHandler;
 import server.message.MessageHandler;
 import server.user.UserManager;
 import shared.DataConverter;
@@ -32,6 +33,7 @@ public class ChatServer implements Runnable {
             System.out.println("Binding to port " + port + ", please wait  ...");
             server = new ServerSocket(port);
             System.out.println("Server started: " + server);
+            GroupHandler.scanRegisterUser();
             start();
         } catch (IOException ioe) {
             System.out.println("Can not bind to port " + port + ": " + ioe.getMessage());

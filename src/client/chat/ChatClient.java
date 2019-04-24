@@ -75,7 +75,6 @@ public class ChatClient implements Runnable {
                 if (items.length != 4) {
                     System.out.println("Invalid parameter number, usage: '.login [username] [password] [token]'");
                     return true;
-//            continue;
                 }
                 String username = items[1];
                 String password = items[2];
@@ -85,8 +84,8 @@ public class ChatClient implements Runnable {
                 } catch (NumberFormatException e) {
                     tokenWindow.notice(1, "Token should be a number");
                     return false;
+                    // debug
 //            System.out.println("Invalid token type, token should be a number");
-//            continue;
                 }
                 System.out.println("Token: " + token);
                 String signature = clientAuthenticator.signChallenge(this.challengeFromServer);
@@ -94,7 +93,6 @@ public class ChatClient implements Runnable {
                 streamOut.writeUTF(cmd);
                 streamOut.flush();
                 return true;
-//          continue;
             }
 
             if (msg.matches("^\\.bye$")) { // ---- send authentication request ----
@@ -103,7 +101,6 @@ public class ChatClient implements Runnable {
                 streamOut.flush();
                 // ============need to close the window==================
                 return true;
-//          continue;
             }
 
             if (this.hasAuthenticated) {
@@ -212,7 +209,7 @@ public class ChatClient implements Runnable {
                     clientWin = new ClientChatWindow(this);
                 } else {
                     String statusMessage = items.length >= 4 ? items[3] : "";
-
+                    tokenWindow.notice(1, "Authentication failed - " + statusCode + " " + statusMessage);
                     System.out.println(">> [Server]: Authentication failed - " + statusCode + " " + statusMessage);
                 }
             }
