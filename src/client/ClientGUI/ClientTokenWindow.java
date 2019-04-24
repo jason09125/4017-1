@@ -66,6 +66,17 @@ public class ClientTokenWindow {
         user_name.setBounds(45, 140, 200, user_lab_size.height);
         contentPane.add(user_name);
 
+        user_name.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (user_name.getText().isEmpty() || password.getText().isEmpty() || user_token.getText().isEmpty()) {
+                    notice(1, "Please fill in all info. first");
+                } else {
+                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText());
+                }
+            }
+        });
+
         pw_lab = new JLabel("Password:");
         Dimension pw_lab_size = pw_lab.getPreferredSize();
         pw_lab.setBounds(110, 170, pw_lab_size.width, user_lab_size.height);
@@ -76,6 +87,17 @@ public class ClientTokenWindow {
         password.setBounds(45, 195, 200, user_lab_size.height);
         contentPane.add(password);
 
+        password.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (user_name.getText().isEmpty() || password.getText().isEmpty() || user_token.getText().isEmpty()) {
+                    notice(1, "Please fill in all info. first");
+                } else {
+                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText());
+                }
+            }
+        });
+
         token_lab = new JLabel("Token:");
         Dimension token_lab_size = token_lab.getPreferredSize();
         token_lab.setBounds(120, 220, token_lab_size.width, user_lab_size.height);
@@ -84,6 +106,17 @@ public class ClientTokenWindow {
         user_token = new JTextField("", 30);
         user_token.setBounds(45, 245, 200, user_lab_size.height);
         contentPane.add(user_token);
+
+        user_token.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (user_name.getText().isEmpty() || password.getText().isEmpty() || user_token.getText().isEmpty()) {
+                    notice(1, "Please fill in all info. first");
+                } else {
+                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText());
+                }
+            }
+        });
 
         login_but = new JButton("Connect");
         login_but.setBounds(85, 280, 120, 45);

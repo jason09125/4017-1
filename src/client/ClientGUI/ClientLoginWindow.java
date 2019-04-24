@@ -65,6 +65,17 @@ public class ClientLoginWindow {
         serverIP.setBounds(45, 140, 200, server_IP_size.height);
         contentPane.add(serverIP);
 
+        serverIP.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (serverIP.getText().isEmpty() || port.getText().isEmpty() || user_token.getText().isEmpty()) {
+                    notice(1, "Please fill in all info. first");
+                } else {
+                    ChatClient client = new ChatClient(serverIP.getText(), Integer.parseInt(port.getText()), "./client-config/" + user_token.getText() + ".properties");
+                }
+            }
+        });
+
         port_num = new JLabel("Port number:");
         Dimension port_num_size = port_num.getPreferredSize();
         port_num.setBounds(95, 170, port_num_size.width, port_num_size.height);
@@ -75,6 +86,17 @@ public class ClientLoginWindow {
         port.setBounds(45, 190, 200, server_IP_size.height);
         contentPane.add(port);
 
+        port.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (serverIP.getText().isEmpty() || port.getText().isEmpty() || user_token.getText().isEmpty()) {
+                    notice(1, "Please fill in all info. first");
+                } else {
+                    ChatClient client = new ChatClient(serverIP.getText(), Integer.parseInt(port.getText()), "./client-config/" + user_token.getText() + ".properties");
+                }
+            }
+        });
+
         token_lab = new JLabel("Properties file name:");
         Dimension token_lab_size = token_lab.getPreferredSize();
         token_lab.setBounds(80, 220, token_lab_size.width, server_IP_size.height);
@@ -83,6 +105,17 @@ public class ClientLoginWindow {
         user_token = new JTextField("", 30);
         user_token.setBounds(45, 245, 200, server_IP_size.height);
         contentPane.add(user_token);
+
+        user_token.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (serverIP.getText().isEmpty() || port.getText().isEmpty() || user_token.getText().isEmpty()) {
+                    notice(1, "Please fill in all info. first");
+                } else {
+                    ChatClient client = new ChatClient(serverIP.getText(), Integer.parseInt(port.getText()), "./client-config/" + user_token.getText() + ".properties");
+                }
+            }
+        });
 
         connect = new JButton("Connect");
         connect.setBounds(85, 280, 120, 45);

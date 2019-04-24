@@ -70,6 +70,23 @@ public class ServerSetupWindow {
 		port_setup.setBounds(30, 105, 200, IP_address_size.height);
 		contentPane.add(port_setup);
 
+		port_setup.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				String input_port = port_setup.getText();
+				if(input_port.isEmpty()){
+					notice(1, "Please input a port number.");
+				} else {
+					try {
+						int port = Integer.valueOf(port_setup.getText());
+						ChatServer server = new ChatServer(port);
+						frame.dispose();
+					} catch (NumberFormatException nfe) {
+						notice(1, "Please input the port as Integer.");
+					}
+				}
+			}
+		});
+
 		create = new JButton("Create");
 		create.setBounds(85, 200, 120, 45);
 		contentPane.add(create);
@@ -77,12 +94,17 @@ public class ServerSetupWindow {
 		create.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
-					int port = Integer.valueOf(port_setup.getText());
-					ChatServer server = new ChatServer(port);
-					frame.dispose();
-				} catch (NumberFormatException nfe) {
-					notice(1, "Please input the port as Integer.");
+				String input_port = port_setup.getText();
+				if(input_port.isEmpty()){
+					notice(1, "Please input a port number.");
+				} else {
+					try {
+						int port = Integer.valueOf(port_setup.getText());
+						ChatServer server = new ChatServer(port);
+						frame.dispose();
+					} catch (NumberFormatException nfe) {
+						notice(1, "Please input the port as Integer.");
+					}
 				}
 			}
 		});
