@@ -26,10 +26,6 @@ Detailed steps of starting, logging in, chatting, creating a new user will be pr
 
 ### Quit the program from a client (signing off)
 
-Anytime use `Ctrl + C` or input `.bye` to quit in the console mode
-
-OR
-
 Close the GUI window and click YES button at the pop-up window
 
 ### Get config files ready
@@ -90,7 +86,7 @@ For those who don't install Maven, a package of the latest version is prepared f
 1. Run `java -cp JavaChat-1.0.jar server.chat.ChatServer' and then input the port number you want. 
 P.S. (The server IP is defalt as your IP)
 
-> Or use `mvn exec:java -Dexec.mainClass="server.chat.ChatServer" -Dexec.args="6000"` to run directly with Maven in root directory
+> Or use `mvn exec:java -Dexec.mainClass="server.chat.ChatServer"` to run directly with Maven in root directory
 
 #### Running client
 
@@ -105,17 +101,11 @@ P.S. (The server IP is defalt as your IP)
 
 > token is a time-based one time password (OTP), you should retrieve it from an app like Google Authenticator
 
-> Or use `mvn exec:java -Dexec.mainClass="client.chat.ChatClient" -Dexec.args="localhost 6000 ./client-config/eric.properties"` to run directly with Maven in root directory
+> Or use `mvn exec:java -Dexec.mainClass="client.chat.ChatClient" ./client-config/eric.properties"` to run directly with Maven in root directory
 
 #### Terminating
 
-For both client and server programs, use keyboard shortcut `Ctrl + C` in the terminal to terminate it.
-
-Or you can input `.bye` on client program to terminate it in the console mode
-
-OR
-
-Close the GUI window and click YES button at the pop-up window
+For both client and server programs, close the GUI window and click YES button at the pop-up window to quit the program.
 
 ### Instructions of logging in, chatting and creating new user
 
