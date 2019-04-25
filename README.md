@@ -402,16 +402,16 @@ if md5_verified:
 ```
 
 ### Group Chat
-The group chat funciton mainly focus on the relationship between groups and clients.
+The group chat function mainly focuses on the relationship between groups and clients.
 
 #### 1. Client wants to create a new chat group
-We provide a funtion that let the client to add a new group, in case the new group's name is not exist. The client clicked the Create Group button in the ClientChatWindow, it will triger the program to send `COMMAND ADD_GROUP` with client and new group's name. Server will recieve the message and call GroupHandler to check weather the new group can be added or not. If it is valid, then return the group neme to the client and added to the client's group list. If not, it will return is message `COMMAND FAIL_ADD`, and the message will displayed on the chat window to notice the user.
+We provide a function that let the client to add a new group, in case the new group's name is not exist. The client clicked the Create Group button in the ClientChatWindow, it will trigger the program to send `COMMAND ADD_GROUP` with client and new group's name. Server will receive the message and call GroupHandler to check whether the new group can be added or not. If it is valid, then return the group name to the client and added to the client's group list. If not, it will return is message `COMMAND FAIL_ADD`, and the message will be displayed on the chat window to notice the user.
 
 #### 2. Client wants to add a member to group
-It is also possible for the clients to add someone that is registed in the server to a group. It strated from the client, the client can type a name and click ADD MEMBER button, it will trigger the system to send `COMMAND ADD_MEMBER` with new member name and group name. Server will recieve the message and call GroupHandler to check weather the new mamber can be added or not. If it is valid, then return a valid message to the client and send the group name to the newly added client. If not, it will return is message `COMMAND FAIL_ADD`, and the message will displayed on the chat window to notice the user.
+It is also possible for the clients to add someone that is registered in the server to a group. It started from the client, the client can type a name and click ADD MEMBER button, it will trigger the system to send `COMMAND ADD_MEMBER` with new member name and group name. Server will receive the message and call GroupHandler to check whether  the new mamber can be added or not. If it is valid, then return a valid message to the client and send the group name to the newly added client. If not, it will return is message `COMMAND FAIL_ADD`, and the message will be displayed on the chat window to notice the user.
 
 #### 3. Client gets the Group List
-Once the user is login successfully, the server will send the group names where the client belongs to. The group will added to the group list of ClientChatWindow
+Once the user is login successfully, the server will send the group names where the client belongs to. The group will added to the group list of ClientChatWindow.
 
 ### Termination Phase
 Server will automatically disconnects a client if it's been idle for 5 minutes.
