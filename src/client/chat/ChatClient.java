@@ -98,7 +98,25 @@ public class ChatClient implements Runnable {
             }
 
             if (msg.matches("^\\.GET_GROUP_LIST$")){
+                String[] items = msg.split("\\s+");
+                if (items.length != 1) {
+                    System.out.println("Invalid parameter number, usage: '.login [username] [password] [token]'");
+                    return true;
+                }
                 String attempt = String.format("COMMAND GET_GROUP_LIST %s", username);
+                System.out.println("Sending: " + attempt);
+                streamOut.writeUTF(attempt);
+                streamOut.flush();
+                return true;
+            }
+
+            if (msg.matches("^\\.ADD_GROUP$")){
+                String[] items = msg.split("\\s+");
+                if (items.length != 1) {
+                    System.out.println("Invalid parameter number, usage: '.login [username] [password] [token]'");
+                    return true;
+                }
+                String attempt = String.format("COMMAND ADD_GROUP %s %s", username, toGroup);
                 System.out.println("Sending: " + attempt);
                 streamOut.writeUTF(attempt);
                 streamOut.flush();
@@ -158,11 +176,16 @@ public class ChatClient implements Runnable {
                 publicKeysStorage.setUserPublicKeyMap(username, DataConverter.base64ToBytes(publicKey));
             }
 
+            // get group list of the user
             if(action.equals("GROUP_LIST")){
                 String[] list = items[2].split("\\|");
                 for(String i: list){
                     clientWin.update_data(i, 0);
                 }
+            }
+
+            if(action.equals("FAIL_ADD")){
+                clientWin.update_data("FAILED TO ADD GROUP", 1);
             }
 
             System.out.println("receive: " + msg);

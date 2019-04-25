@@ -118,6 +118,18 @@ public class ClientChatWindow {
         add_group_btn.setBounds(50, 500, 240, 45);
         contentPane.add(add_group_btn);
 
+        add_group_btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (user_input.getText().isEmpty()) {
+                    notice(1, "Cannot send nothing.");
+                } else {
+                    cs.sendMsg(".ADD_GROUP", user_input.getText());
+                    user_input.setText("");
+                }
+            }
+        });
+
         add_member_btn = new JButton("ADD MEMBER");
         add_member_btn.setBounds(320, 500, 240, 45);
         contentPane.add(add_member_btn);

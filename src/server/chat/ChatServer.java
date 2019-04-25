@@ -170,6 +170,21 @@ public class ChatServer implements Runnable {
                 return;
             }
 
+            if (action.equals("ADD_GROUP")) {
+                String senderUsername = items[2];
+                String newGroup = items[3];
+                if (!senderUsername.equals(authenticatedClientUsernameMap.get(ID)) || authenticatedClientUsernameMap.get(ID) == null) {
+                    clients[findClient(ID)].send("RESPONSE SEND_MESSAGE 401 Unauthorized");
+                    return;
+                }
+                if(GroupHandler.addGroup(newGroup, senderUsername)){
+                    clients[findClient(ID)].send("COMMAND GROUP_LIST " + newGroup);
+                } else {
+                    clients[findClient(ID)].send("COMMAND FAIL_ADD");
+                }
+                return;
+            }
+
             if (action.equals("SEND_MESSAGE")) {
                 String senderUsername = items[2];
                 if (!senderUsername.equals(authenticatedClientUsernameMap.get(ID)) || authenticatedClientUsernameMap.get(ID) == null) {
@@ -214,7 +229,6 @@ public class ChatServer implements Runnable {
                             }
                         }
                     }
-
                 }
                 System.out.println("\t^^^^^^^^^^^^^^^^^^^^ HANDLING NEW INCOMING MESSAGE ^^^^^^^^^^^^^^^^^^^^\n");
             }
