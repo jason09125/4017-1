@@ -97,12 +97,13 @@ public class ChatClient implements Runnable {
                 return true;
             }
 
-//            if (msg.matches("^\\.GET_GROUP_LIST$")){
-//                String attempt = String.format("COMMAND GET_GROUP_LIST %s", username);
-//                streamOut.writeUTF(attempt);
-//                streamOut.flush();
-//                return true;
-//            }
+            if (msg.matches("^\\.GET_GROUP_LIST$")){
+                String attempt = String.format("COMMAND GET_GROUP_LIST %s", username);
+                System.out.println("Sending: " + attempt);
+                streamOut.writeUTF(attempt);
+                streamOut.flush();
+                return true;
+            }
 
             if (msg.matches("^\\.bye$")) { // ---- send authentication request ----
                 System.out.println("Quiting...");
@@ -156,18 +157,34 @@ public class ChatClient implements Runnable {
                 System.out.printf("New user (%s) joined, public key: %s\n", username, publicKey);
                 publicKeysStorage.setUserPublicKeyMap(username, DataConverter.base64ToBytes(publicKey));
             }
+
+            if(action.equals("GROUP_LIST")){
+                String[] list = items[2].split("\\|");
+                for(String i: list){
+                    clientWin.update_data(i, 0);
+                }
+            }
+
             System.out.println("receive: " + msg);
             if (action.equals("DELIVER_MESSAGE")) {
-                if (items.length != 4) return;
-                String senderUsername = items[2];
-                String encryptedWithSessionKey = items[3];
-                String plainText = messageHandler.parseIncoming(senderUsername, encryptedWithSessionKey);
-                if (plainText == null) {
-                    System.out.printf("[Verification Failed] Message from %s is not trusted\n", senderUsername);
+                if (items.length == 4 || items.length == 5){
+                    String senderUsername = items[2];
+                    String encryptedWithSessionKey = items[3];
+                    String fromGroup = "All";
+                    if(items.length == 5){
+                        fromGroup = items[4];
+                    }
+                    System.out.printf("details: %s %s", senderUsername, fromGroup);
+                    String plainText = messageHandler.parseIncoming(senderUsername, encryptedWithSessionKey);
+                    if (plainText == null) {
+                        System.out.printf("[Verification Failed] Message from %s is not trusted\n", senderUsername);
+                        return;
+                    }
+                    clientWin.update_data("Group: " + fromGroup + "\nUser: " + senderUsername + ": " + plainText, 1);
+                    System.out.printf("\n[%s]: %s\n", senderUsername, plainText);
+                } else {
                     return;
                 }
-                clientWin.update_data(senderUsername + ": " + plainText, 1);
-                System.out.printf("\n[%s]: %s\n", senderUsername, plainText);
             }
             return;
         }
@@ -221,6 +238,7 @@ public class ChatClient implements Runnable {
 
                     tokenWindow.close(0);
                     clientWin = new ClientChatWindow(this);
+                    sendMsg(".GET_GROUP_LIST", "");
                 } else {
                     String statusMessage = items.length >= 4 ? items[3] : "";
                     tokenWindow.notice(1, "Authentication failed - " + statusCode + " " + statusMessage);

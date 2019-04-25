@@ -47,6 +47,10 @@ public class GroupHandler {
         return true;
     }
 
+    public static ArrayList<String> getMembers(String groupname){
+        return groupClientsMap.get(groupname);
+    }
+
     public static boolean addMember(String groupname, String username) {
         if (isAddUserAuthed(username)) {
             return groupClientsMap.get(groupname).add(username);

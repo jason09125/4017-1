@@ -153,6 +153,10 @@ public class ClientChatWindow {
                 frame.dispose();
                 System.exit(0);
                 break;
+            case 1:
+                frame.dispose();
+                System.exit(0);
+                break;
             default:
                 frame.dispose();
                 break;
@@ -207,7 +211,7 @@ public class ClientChatWindow {
                         null,
                         choose,
                         choose[0]);
-                close(0);
+                close(1);
                 break;
             default:
                 break;

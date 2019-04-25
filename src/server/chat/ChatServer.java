@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class ChatServer implements Runnable {
             server = new ServerSocket(port);
             System.out.println("Server started: " + server);
             GroupHandler.scanRegisterUser();
+            GroupHandler.addGroup("abc", "Eric");
             start();
         } catch (IOException ioe) {
             System.out.println("Can not bind to port " + port + ": " + ioe.getMessage());
@@ -158,6 +160,16 @@ public class ChatServer implements Runnable {
                 }
             }
 
+            if (action.equals("GET_GROUP_LIST")) {
+                String senderUsername = items[2];
+                if (!senderUsername.equals(authenticatedClientUsernameMap.get(ID)) || authenticatedClientUsernameMap.get(ID) == null) {
+                    clients[findClient(ID)].send("RESPONSE SEND_MESSAGE 401 Unauthorized");
+                    return;
+                }
+                clients[findClient(ID)].send("COMMAND GROUP_LIST " + GroupHandler.getClientGroupList(senderUsername));
+                return;
+            }
+
             if (action.equals("SEND_MESSAGE")) {
                 String senderUsername = items[2];
                 if (!senderUsername.equals(authenticatedClientUsernameMap.get(ID)) || authenticatedClientUsernameMap.get(ID) == null) {
@@ -179,9 +191,30 @@ public class ChatServer implements Runnable {
                         System.out.println("\n\t\t> Delivering to " + receiverUsername);
                         String deliverableMessage = MessageHandler.getDeliverable(receiverUsername, signedByServer);
 
-                        clients[i].send("COMMAND DELIVER_MESSAGE " + senderUsername + " " + deliverableMessage);
+                        clients[i].send("COMMAND DELIVER_MESSAGE " + senderUsername + " " + deliverableMessage + " " + "All");
                         System.out.println();
                     }
+                } else {
+                    String toGroup = items[4];
+                    ArrayList groupMemberList = GroupHandler.getMembers(toGroup);
+
+                    for (int i = 0; i < groupMemberList.size(); i++) {
+                        for (int j = 0; j < clientCount; j++) {
+                            // filter out those not authenticated
+                            if (authenticatedClientUsernameMap.get(clients[i].getID()) == null) {
+                                continue;
+                            }
+                            String receiverUsername = authenticatedClientUsernameMap.get(clients[i].getID());
+                            if(receiverUsername.equals(groupMemberList.get(i))){
+                                System.out.println("\n\t\t> Delivering to " + receiverUsername);
+                                String deliverableMessage = MessageHandler.getDeliverable(receiverUsername, signedByServer);
+
+                                clients[i].send("COMMAND DELIVER_MESSAGE " + senderUsername + " " + deliverableMessage + " " +toGroup);
+                                System.out.println();
+                            }
+                        }
+                    }
+
                 }
                 System.out.println("\t^^^^^^^^^^^^^^^^^^^^ HANDLING NEW INCOMING MESSAGE ^^^^^^^^^^^^^^^^^^^^\n");
             }
