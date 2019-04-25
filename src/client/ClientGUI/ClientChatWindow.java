@@ -21,6 +21,8 @@ public class ClientChatWindow {
     private JButton send_btn;
     private JButton add_group_btn;
     private JButton add_member_btn;
+    private DefaultListModel listModle;
+    private JList groupList;
     private JLabel bg;
 
     private ChatClient cs;
@@ -64,6 +66,14 @@ public class ClientChatWindow {
         user_name.setBounds(welcome_size.width + 15, 15, user_name_size.width, welcome_size.height);
         contentPane.add(user_name);
 
+        listModle = new DefaultListModel();
+        listModle.addElement("All");
+        groupList = new JList(listModle);
+        groupList.setBounds(15, 65, 265, 350);
+        groupList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        groupList.setSelectedIndex(0);
+        contentPane.add(groupList);
+
         chat_record = new JTextArea(5, 30);
         scroll_for_chat = new JScrollPane(chat_record);
         scroll_for_chat.setBounds(300, 65, 380, 350);
@@ -77,16 +87,28 @@ public class ClientChatWindow {
         user_input.setBounds(50, 450, 400, welcome_size.height);
         contentPane.add(user_input);
 
+        user_input.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (user_input.getText().isEmpty()) {
+                    notice(1, "Cannot send nothing.");
+                } else {
+                    cs.sendMsg(user_input.getText(), groupList.getSelectedValue().toString());
+                    user_input.setText("");
+                }
+            }
+        });
+
         send_btn = new JButton("SEND");
         send_btn.setBounds(470, 445, 120, 45);
         contentPane.add(send_btn);
 
         send_btn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if(user_input.getText().isEmpty()){
+                if (user_input.getText().isEmpty()) {
                     notice(1, "Cannot send nothing.");
                 } else {
-                    cs.sendMsg(user_input.getText());
+                    cs.sendMsg(user_input.getText(), groupList.getSelectedValue().toString());
                     user_input.setText("");
                 }
             }
@@ -113,9 +135,7 @@ public class ClientChatWindow {
     public void update_data(String data, int option) {
         switch (option) {
             case 0:
-//                num_client.setText(data);
-//                chat_record.setCaretPosition(chat_record.getDocument().getLength());
-//                System.out.println("connected clients: " + num_client.getText());
+                listModle.addElement(data);
                 break;
             case 1:
                 chat_record.append(data + "\n");
@@ -129,6 +149,7 @@ public class ClientChatWindow {
     public void close(Integer option) {
         switch (option) {
             case 0:
+                cs.sendMsg(".bye", "All");
                 frame.dispose();
                 System.exit(0);
                 break;
@@ -173,6 +194,20 @@ public class ClientChatWindow {
                         agreement,
                         agreement[0]);
 
+                break;
+            case 2:
+                String[] choose = {"OK"};
+
+                int dialog = JOptionPane.showOptionDialog(
+                        null,
+                        noti_msg,
+                        "Notification",
+                        JOptionPane.YES_NO_CANCEL_OPTION,
+                        JOptionPane.WARNING_MESSAGE,
+                        null,
+                        choose,
+                        choose[0]);
+                close(0);
                 break;
             default:
                 break;

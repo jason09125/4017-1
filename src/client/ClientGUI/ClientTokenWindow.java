@@ -72,7 +72,7 @@ public class ClientTokenWindow {
                 if (user_name.getText().isEmpty() || password.getText().isEmpty() || user_token.getText().isEmpty()) {
                     notice(1, "Please fill in all info. first");
                 } else {
-                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText());
+                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText(), "");
                 }
             }
         });
@@ -93,7 +93,7 @@ public class ClientTokenWindow {
                 if (user_name.getText().isEmpty() || password.getText().isEmpty() || user_token.getText().isEmpty()) {
                     notice(1, "Please fill in all info. first");
                 } else {
-                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText());
+                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText(), "");
                 }
             }
         });
@@ -113,7 +113,7 @@ public class ClientTokenWindow {
                 if (user_name.getText().isEmpty() || password.getText().isEmpty() || user_token.getText().isEmpty()) {
                     notice(1, "Please fill in all info. first");
                 } else {
-                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText());
+                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText(), "");
                 }
             }
         });
@@ -128,7 +128,7 @@ public class ClientTokenWindow {
                 if (user_name.getText().isEmpty() || password.getText().isEmpty() || user_token.getText().isEmpty()) {
                     notice(1, "Please fill in all info. first");
                 } else {
-                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText());
+                    chatClient.sendMsg(".login " + user_name.getText() + " " + password.getText() + " " + user_token.getText(), "");
                 }
             }
         });

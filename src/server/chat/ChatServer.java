@@ -168,17 +168,20 @@ public class ChatServer implements Runnable {
                 System.out.println("\n\t-------------------- HANDLING NEW INCOMING MESSAGE --------------------");
                 System.out.println("\n\t\t> Sender is " + senderUsername);
                 byte[] signedByServer = MessageHandler.parseFromClientAndSign(senderUsername, UserManager.getPublicKey(senderUsername), cipherText);
-                for (int i = 0; i < clientCount; i++) {
-                    // filter out those not authenticated
-                    if (authenticatedClientUsernameMap.get(clients[i].getID()) == null) {
-                        continue;
-                    }
-                    String receiverUsername = authenticatedClientUsernameMap.get(clients[i].getID());
-                    System.out.println("\n\t\t> Delivering to " + receiverUsername);
-                    String deliverableMessage = MessageHandler.getDeliverable(receiverUsername, signedByServer);
 
-                    clients[i].send("COMMAND DELIVER_MESSAGE " + senderUsername + " " + deliverableMessage);
-                    System.out.println();
+                if (items[4].equals("All")) {
+                    for (int i = 0; i < clientCount; i++) {
+                        // filter out those not authenticated
+                        if (authenticatedClientUsernameMap.get(clients[i].getID()) == null) {
+                            continue;
+                        }
+                        String receiverUsername = authenticatedClientUsernameMap.get(clients[i].getID());
+                        System.out.println("\n\t\t> Delivering to " + receiverUsername);
+                        String deliverableMessage = MessageHandler.getDeliverable(receiverUsername, signedByServer);
+
+                        clients[i].send("COMMAND DELIVER_MESSAGE " + senderUsername + " " + deliverableMessage);
+                        System.out.println();
+                    }
                 }
                 System.out.println("\t^^^^^^^^^^^^^^^^^^^^ HANDLING NEW INCOMING MESSAGE ^^^^^^^^^^^^^^^^^^^^\n");
             }

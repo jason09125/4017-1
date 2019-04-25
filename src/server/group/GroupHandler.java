@@ -73,16 +73,16 @@ public class GroupHandler {
 
     public static void main(String args[]) {
         // testing
-        scanRegisterUser();
-        addGroup("abc", "jason");
-        addMember("abc", "dfsb");
-        addMember("abc", "Eric");
-        addGroup("asdv", "fgdb");
-        addGroup("asv", "jason");
-        quitGroup("abc", "Joe");
-        addGroup("xzcv", "7685");
-        addGroup("abc", "ytm");
-        System.out.println(getClientGroupList("jason"));
+//        scanRegisterUser();
+//        addGroup("abc", "jason");
+//        addMember("abc", "dfsb");
+//        addMember("abc", "Eric");
+//        addGroup("asdv", "fgdb");
+//        addGroup("asv", "jason");
+//        quitGroup("abc", "Joe");
+//        addGroup("xzcv", "7685");
+//        addGroup("abc", "ytm");
+//        System.out.println(getClientGroupList("jason"));
     }
 
 }

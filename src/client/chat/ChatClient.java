@@ -40,7 +40,6 @@ public class ChatClient implements Runnable {
         this.publicKeysStorage = new PublicKeysStorage();
         this.messageHandler = new MessageHandler(this.clientAuthenticator, this.publicKeysStorage);
 
-
         if (clientAuthenticator.getServerPublicKey().length != 0) {
             System.out.println("Establishing connection. Please wait ...");
             try {
@@ -62,7 +61,7 @@ public class ChatClient implements Runnable {
 //    while (thread == thisThread)
     }
 
-    public boolean sendMsg(String msg) {
+    public boolean sendMsg(String msg, String toGroup) {
 //    while (thread != null) {
         try {
 //        String line = console.readLine();
@@ -98,18 +97,29 @@ public class ChatClient implements Runnable {
                 return true;
             }
 
+//            if (msg.matches("^\\.GET_GROUP_LIST$")){
+//                String attempt = String.format("COMMAND GET_GROUP_LIST %s", username);
+//                streamOut.writeUTF(attempt);
+//                streamOut.flush();
+//                return true;
+//            }
+
             if (msg.matches("^\\.bye$")) { // ---- send authentication request ----
                 System.out.println("Quiting...");
                 streamOut.writeUTF("COMMAND QUIT");
                 streamOut.flush();
                 // ============need to close the window==================
+                clientWin.close(0);
                 return true;
             }
 
             if (this.hasAuthenticated) {
                 // send message
                 String cipherText = messageHandler.getDeliverable(msg);
-                streamOut.writeUTF(String.format("COMMAND SEND_MESSAGE %s %s", this.username, cipherText));
+                if(toGroup.isEmpty()){
+                    toGroup = "All";
+                }
+                streamOut.writeUTF(String.format("COMMAND SEND_MESSAGE %s %s %s", this.username, cipherText, toGroup));
                 streamOut.flush();
                 return true;
             } else {
@@ -118,6 +128,7 @@ public class ChatClient implements Runnable {
             }
         } catch (IOException ioe) {
             System.out.println("Sending error: " + ioe.getMessage());
+            clientWin.notice(2, "The server may not online");
             stop();
             return false;
         }
