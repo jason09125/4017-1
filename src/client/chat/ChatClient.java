@@ -40,17 +40,20 @@ public class ChatClient implements Runnable {
         this.publicKeysStorage = new PublicKeysStorage();
         this.messageHandler = new MessageHandler(this.clientAuthenticator, this.publicKeysStorage);
 
-        System.out.println("Establishing connection. Please wait ...");
-        try {
-            socket = new Socket(serverName, serverPort);
-            System.out.println("Connected: " + socket);
-            start();
-        } catch (UnknownHostException uhe) {
-            login_win.notice(1, "Please check the server IP and Port.\nOr the server may not started yet.");
+
+        if (clientAuthenticator.getServerPublicKey().length != 0) {
+            System.out.println("Establishing connection. Please wait ...");
+            try {
+                socket = new Socket(serverName, serverPort);
+                System.out.println("Connected: " + socket);
+                start();
+            } catch (UnknownHostException uhe) {
+                login_win.notice(1, "Please check the server IP and Port.\nOr the server may not started yet.");
 //      System.out.println("Host unknown: " + uhe.getMessage());
-        } catch (IOException ioe) {
-            login_win.notice(1, "Please check the server IP and Port.\nOr the server may not started yet.");
+            } catch (IOException ioe) {
+                login_win.notice(1, "Please check the server IP and Port.\nOr the server may not started yet.");
 //      System.out.println("Unexpected exception: " + ioe.getMessage());
+            }
         }
     }
 
