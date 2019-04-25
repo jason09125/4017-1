@@ -134,6 +134,18 @@ public class ClientChatWindow {
         add_member_btn.setBounds(320, 500, 240, 45);
         contentPane.add(add_member_btn);
 
+        add_member_btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (user_input.getText().isEmpty()) {
+                    notice(1, "Cannot send nothing.");
+                } else {
+                    cs.sendMsg(".ADD_MEMBER " + user_input.getText(), groupList.getSelectedValue().toString());
+                    user_input.setText("");
+                }
+            }
+        });
+
         String file_path = System.getProperty("user.dir");
         ImageIcon background = new ImageIcon(file_path + "\\src\\client\\image\\chat_room_bg.jpeg");
         Image image = background.getImage(); // transform it

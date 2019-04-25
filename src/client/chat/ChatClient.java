@@ -123,6 +123,19 @@ public class ChatClient implements Runnable {
                 return true;
             }
 
+            String[] tmpMsg = msg.split("\\s+");
+            if (tmpMsg[0].matches("^\\.ADD_MEMBER$")){
+                if (tmpMsg.length != 2) {
+                    System.out.println("Invalid parameter number, usage: '.login [username] [password] [token]'");
+                    return true;
+                }
+                String attempt = String.format("COMMAND ADD_MEMBER %s %s", tmpMsg[1], toGroup);
+                System.out.println("Sending: " + attempt);
+                streamOut.writeUTF(attempt);
+                streamOut.flush();
+                return true;
+            }
+
             if (msg.matches("^\\.bye$")) { // ---- send authentication request ----
                 System.out.println("Quiting...");
                 streamOut.writeUTF("COMMAND QUIT");
@@ -182,6 +195,10 @@ public class ChatClient implements Runnable {
                 for(String i: list){
                     clientWin.update_data(i, 0);
                 }
+            }
+
+            if(action.equals("PASS")){
+                clientWin.update_data("MEMBER ADDED", 1);
             }
 
             if(action.equals("FAIL_ADD")){

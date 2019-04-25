@@ -185,6 +185,32 @@ public class ChatServer implements Runnable {
                 return;
             }
 
+            if (action.equals("ADD_MEMBER")) {
+                String newMember = items[2];
+                String group = items[3];
+
+                if(GroupHandler.addMember(group, newMember)){
+                    clients[findClient(ID)].send("COMMAND PASS");
+
+                    for (int i = 0; i < clientCount; i++) {
+                        // filter out those not authenticated
+                        if (authenticatedClientUsernameMap.get(clients[i].getID()) == null) {
+                            continue;
+                        }
+                        String receiverUsername = authenticatedClientUsernameMap.get(clients[i].getID());
+                        if(receiverUsername.equals(newMember)){
+                            System.out.println("\n\t\t> Delivering to " + receiverUsername);
+
+                            clients[findClient(ID)].send("COMMAND GROUP_LIST " + group);
+                            System.out.println();
+                        }
+                    }
+                } else {
+                    clients[findClient(ID)].send("COMMAND FAIL_ADD");
+                }
+                return;
+            }
+
             if (action.equals("SEND_MESSAGE")) {
                 String senderUsername = items[2];
                 if (!senderUsername.equals(authenticatedClientUsernameMap.get(ID)) || authenticatedClientUsernameMap.get(ID) == null) {
